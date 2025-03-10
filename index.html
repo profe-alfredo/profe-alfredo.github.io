@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Introducción a HTML</title>
-    <link rel="stylesheet" href="styles.css">
+    <link id="stylesheet" rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
@@ -55,11 +55,23 @@ body {
     background-color: #f4f4f4;
 }
         </code></pre>
+        <button onclick="toggleStyle()">Cambiar Estilo</button>
     </section>
     
     <section id="referencias">
         <h2>Referencias</h2>
         <p>Consulta más información en <a href="https://developer.mozilla.org/es/docs/Web/HTML" target="_blank">MDN Web Docs</a>.</p>
     </section>
+
+    <script>
+        function toggleStyle() {
+            let stylesheet = document.getElementById("stylesheet");
+            if (stylesheet.getAttribute("href") === "styles.css") {
+                stylesheet.setAttribute("href", "cyberpunk.css");
+            } else {
+                stylesheet.setAttribute("href", "styles.css");
+            }
+        }
+    </script>
 </body>
 </html>
