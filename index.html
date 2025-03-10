@@ -3,115 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Lobo Mexicano</title>
-    <style>
-        /* Estilos generales de la página */
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-        }
-        
-        /* Estilos para el título */
-        h1 {
-            color: #4A4A4A;
-        }
-
-        /* Estilos para el párrafo de introducción */
-        p {
-            width: 80%;
-            margin: auto;
-        }
-
-        /* Contenedor de las imágenes */
-        .imagenes {
-            margin-top: 20px;
-        }
-
-        /* Estilos para las imágenes */
-        img {
-            width: 300px; /* Ajusta el ancho de las imágenes */
-            height: auto;
-            margin: 10px;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); /* Sombra ligera */
-        }
-
-        /* Estilos para el botón */
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        /* Cambio de color cuando el botón es presionado */
-        button:hover {
-            background-color: #45a049;
-        }
-
-        /* Estilos para el contador de visitas */
-        #contador {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #333;
-        }
-    </style>
+    <title>Introducción a HTML</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <!-- Título principal de la página -->
-    <h1>El Lobo Mexicano</h1>
-
-    <!-- Párrafo con información sobre el lobo mexicano -->
-    <p>El lobo mexicano (*Canis lupus baileyi*) es una subespecie de lobo gris que habita en México y el suroeste de Estados Unidos. Es uno de los cánidos más amenazados y forma parte de programas de conservación para su recuperación.</p>
-
-    <!-- Contenedor con dos imágenes del lobo mexicano -->
-    <div class="imagenes">
-        <img src="https://static.nationalgeographic.es/files/styles/image_3200/public/Lobo%20mexicano.webp?w=430&h=242" alt="Lobo mexicano en su hábitat">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Mexican_Wolf_-_Lobo_Mexicano.jpg/250px-Mexican_Wolf_-_Lobo_Mexicano.jpg" alt="Lobo mexicano primer plano">
-    </div>
-
-    <!-- Botón que mostrará información adicional y el número de visitas -->
-    <button onclick="mostrarMensaje()">Más información</button>
-
-    <!-- Contador de visitas -->
-    <p id="contador">Visitas: 0</p>
-
-    <script>
-        /* Función que muestra un mensaje con información del lobo y el número de visitas */
-        function mostrarMensaje() {
-            let visitas = localStorage.getItem("visitas"); // Obtiene el número de visitas almacenadas en el navegador
-            if (visitas === null) {
-                visitas = 1; // Si es la primera vez que se visita la página, inicia en 1
-            } else {
-                visitas = parseInt(visitas); // Convierte el valor de visitas en número
-            }
-
-            // Muestra el mensaje con la información del lobo y el número de visitas
-            alert("El lobo mexicano es clave para el equilibrio del ecosistema. Se encuentra en programas de reintroducción para evitar su extinción.\n\nVisitas registradas en tu navegador: " + visitas);
-        }
-
-        /* Función que actualiza y muestra el contador de visitas */
-        function actualizarContador() {
-            let visitas = localStorage.getItem("visitas"); // Obtiene el número de visitas almacenadas
-
-            if (visitas === null) {
-                visitas = 1; // Si es la primera visita, inicia en 1
-            } else {
-                visitas = parseInt(visitas) + 1; // Suma 1 al contador
-            }
-
-            localStorage.setItem("visitas", visitas); // Guarda el nuevo valor en el almacenamiento local
-            document.getElementById("contador").innerText = "Visitas: " + visitas; // Muestra el contador en la página
-        }
-
-        actualizarContador(); // Llamamos a la función cuando carga la página para actualizar el contador
-    </script>
-
+    <header>
+        <h1>Introducción a HTML</h1>
+        <nav>
+            <ul>
+                <li><a href="#estructura">Estructura</a></li>
+                <li><a href="#etiquetas">Etiquetas Básicas</a></li>
+                <li><a href="#estilos">Estilos con CSS</a></li>
+                <li><a href="#referencias">Referencias</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <section id="estructura">
+        <h2>Estructura Básica de HTML</h2>
+        <p>Todo documento HTML sigue una estructura básica:</p>
+        <pre><code>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Título de la Página&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Hola Mundo&lt;/h1&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+    </section>
+    
+    <section id="etiquetas">
+        <h2>Etiquetas Básicas</h2>
+        <p>Algunas etiquetas esenciales son:</p>
+        <ul>
+            <li><code>&lt;p&gt;</code>: Párrafos</li>
+            <li><code>&lt;a&gt;</code>: Enlaces</li>
+            <li><code>&lt;img&gt;</code>: Imágenes</li>
+            <li><code>&lt;ul&gt;</code> y <code>&lt;li&gt;</code>: Listas</li>
+        </ul>
+    </section>
+    
+    <section id="estilos">
+        <h2>Estilos con CSS</h2>
+        <p>Podemos modificar la apariencia con CSS. Por ejemplo:</p>
+        <pre><code>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+        </code></pre>
+    </section>
+    
+    <section id="referencias">
+        <h2>Referencias</h2>
+        <p>Consulta más información en <a href="https://developer.mozilla.org/es/docs/Web/HTML" target="_blank">MDN Web Docs</a>.</p>
+    </section>
 </body>
 </html>
