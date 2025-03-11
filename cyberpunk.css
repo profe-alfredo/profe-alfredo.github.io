@@ -11,7 +11,7 @@ header {
     color: white;
     text-align: center;
     padding: 20px;
-    text-shadow: 0 0 10px #ff007f;
+    text-shadow: 0 0 10px #1a1a1a;
 }
 
 nav ul {
@@ -73,5 +73,5 @@ a {
 
 a:hover {
     text-decoration: underline;
-    color: #ff007f;
+    color: #00ff00;
 }
