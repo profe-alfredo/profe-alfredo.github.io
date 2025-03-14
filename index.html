@@ -1,77 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Introducción a HTML</title>
-    <link id="stylesheet" rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Página Personal</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <header>
-        <h1>Introducción a HTML</h1>
-        <nav>
-            <ul>
-                <li><a href="#estructura">Estructura</a></li>
-                <li><a href="#etiquetas">Etiquetas Básicas</a></li>
-                <li><a href="#estilos">Estilos con CSS</a></li>
-                <li><a href="#referencias">Referencias</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <section id="estructura">
-        <h2>Estructura Básica de HTML</h2>
-        <p>Todo documento HTML sigue una estructura básica:</p>
-        <pre><code>
-&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-    &lt;head&gt;
-        &lt;title&gt;Título de la Página&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;h1&gt;Hola Mundo&lt;/h1&gt;
-    &lt;/body&gt;
-&lt;/html&gt;
-        </code></pre>
-    </section>
-    
-    <section id="etiquetas">
-        <h2>Etiquetas Básicas</h2>
-        <p>Algunas etiquetas esenciales son:</p>
-        <ul>
-            <li><code>&lt;p&gt;</code>: Párrafos</li>
-            <li><code>&lt;a&gt;</code>: Enlaces</li>
-            <li><code>&lt;img&gt;</code>: Imágenes</li>
-            <li><code>&lt;ul&gt;</code> y <code>&lt;li&gt;</code>: Listas</li>
-        </ul>
-    </section>
-    
-    <section id="estilos">
-        <h2>Estilos con CSS</h2>
-        <p>Podemos modificar la apariencia con CSS. Por ejemplo:</p>
-        <pre><code>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-}
-        </code></pre>
-        <button onclick="toggleStyle()">Cambiar Estilo</button>
-    </section>
-    
-    <section id="referencias">
-        <h2>Referencias</h2>
-        <p>Consulta más información en <a href="https://developer.mozilla.org/es/docs/Web/HTML" target="_blank">MDN Web Docs</a>.</p>
+
+<header>
+    <h1>Bienvenido a mi página web</h1>
+    <p>Ingeniero y Profesor de Ciencia y Tecnología</p>
+</header>
+
+<nav>
+    <a href="#inicio">Inicio</a>
+    <a href="#acerca">Acerca de mí</a>
+    <a href="#proyectos">Proyectos</a>
+</nav>
+
+<div class="container">
+    <section id="inicio">
+        <h2>Inicio</h2>
+        <p>Esta página es un espacio para presentar y explorar proyectos, intereses y trabajos realizados junto a mis estudiantes.</p>
     </section>
 
-    <script>
-        function toggleStyle() {
-            let stylesheet = document.getElementById("stylesheet");
-            if (stylesheet.getAttribute("href") === "styles.css") {
-                stylesheet.setAttribute("href", "cyberpunk.css");
-            } else {
-                stylesheet.setAttribute("href", "styles.css");
-            }
-        }
-    </script>
+    <section id="acerca">
+        <h2>Acerca de mí</h2>
+        <p>Soy Ingeniero y Profesor de Ciencia y Tecnología, con un fuerte interés en:</p>
+        <ul>
+            <li>Proyectos educativos y STEM</li>
+            <li>Hidroponia</li>
+            <li>Robótica</li>
+            <li>Inteligencia Artificial</li>
+            <li>Diseño e impresión 3D</li>
+        </ul>
+    </section>
+
+    <section id="proyectos">
+        <h2>Proyectos</h2>
+        <p>Aquí están algunos ejemplos de páginas web creadas por mis estudiantes:</p>
+        <ul class="project-list">
+            <li><a href="https://ejemplo1.com" target="_blank">Proyecto 1</a></li>
+            <li><a href="https://ejemplo2.com" target="_blank">Proyecto 2</a></li>
+            <li><a href="https://ejemplo3.com" target="_blank">Proyecto 3</a></li>
+            <!-- Añade más enlaces según sea necesario -->
+        </ul>
+    </section>
+</div>
+
+<footer>
+    &copy; 2025 Mi Página Personal. Todos los derechos reservados.
+</footer>
+
 </body>
 </html>

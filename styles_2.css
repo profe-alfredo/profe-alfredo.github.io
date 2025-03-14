@@ -1,0 +1,84 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+header {
+    background-image: url('A_colorful_and_inviting_digital_illustration_of_a_.webp');
+    background-size: cover; /* La imagen ocupa toda la ventana */
+    background-repeat: no-repeat;
+    background-position: center 80%; /* Centra la imagen en ambas direcciones */
+    color: white;
+    padding: 100px 20px;
+    text-align: center;
+}
+
+
+
+header h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+header p {
+    font-size: 1.5rem;
+    margin: 10px 0 0;
+    color: #222; /* Gris claro para mejor contraste */
+}
+
+
+nav {
+    display: flex;
+    justify-content: center;
+    background-color: #4CAF50;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+}
+
+nav a:hover {
+    background-color: #45a049;
+}
+
+.container {
+    padding: 20px;
+}
+
+h2 {
+    color: #4CAF50;
+}
+
+.project-list {
+    list-style: none;
+    padding: 0;
+}
+
+.project-list li {
+    margin-bottom: 10px;
+}
+
+.project-list a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+.project-list a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+    color: white;
+}
