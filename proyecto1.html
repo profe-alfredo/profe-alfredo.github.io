@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Lobo Mexicano</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #4A4A4A;
+        }
+        p {
+            width: 80%;
+            margin: auto;
+        }
+        .imagenes {
+            margin-top: 20px;
+        }
+        img {
+            width: 300px;
+            height: auto;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>El Lobo Mexicano</h1>
+    <p>El lobo mexicano (*Canis lupus baileyi*) es una subespecie de lobo gris que habita en México y el suroeste de Estados Unidos. Es uno de los cánidos más amenazados y forma parte de programas de conservación para su recuperación.</p>
+
+    <div class="imagenes">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Mexican_Wolf_2_yfb-edit_1.jpg/330px-Mexican_Wolf_2_yfb-edit_1.jpg" alt="Primer plano de un lobo mexicano">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Coronadopack2.jpg" alt="Lobo Mexicano en la naturaleza">
+    </div>
+
+    <button onclick="mostrarMensaje()">Más información</button>
+
+    <script>
+        function mostrarMensaje() {
+            alert("El lobo mexicano es clave para el equilibrio del ecosistema. Se encuentra en programas de reintroducción para evitar su extinción.");
+        }
+        
+        // Contador de visitas usando LocalStorage
+        function actualizarContador() {
+            let visitas = localStorage.getItem("visitas");
+
+            if (visitas === null) {
+                visitas = 1; // Primera visita
+            } else {
+                visitas = parseInt(visitas) + 1; // Aumentar contador
+            }
+
+            localStorage.setItem("visitas", visitas);
+            document.getElementById("contador").innerText = "Visitas: " + visitas;
+        }
+
+        actualizarContador(); // Llamamos a la función cuando carga la página
+    </script>
+    </script>
+
+</body>
+</html>
