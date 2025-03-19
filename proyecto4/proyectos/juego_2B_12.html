@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego Futurista</title>
+    <style>
+        body {
+            background: #1e1e1e;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #000;
+        }
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="score">Puntuación: 0</div>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+
+        // Nave
+        const spaceship = {
+            x: canvas.width / 2 - 25,
+            y: canvas.height - 60,
+            width: 50,
+            height: 50,
+            speed: 5,  // Velocidad reducida de la nave
+            dx: 0
+        };
+
+        // Obstáculo
+        const obstacles = [];
+        const obstacleSpeed = 2;  // Velocidad reducida de los obstáculos
+
+        // Función para dibujar la nave
+        function drawSpaceship() {
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(spaceship.x, spaceship.y, spaceship.width, spaceship.height);
+        }
+
+        // Función para mover la nave
+        function moveSpaceship() {
+            spaceship.x += spaceship.dx;
+
+            // Limitar el movimiento de la nave para que no salga de la pantalla
+            if (spaceship.x < 0) spaceship.x = 0;
+            if (spaceship.x + spaceship.width > canvas.width) spaceship.x = canvas.width - spaceship.width;
+        }
+
+        // Función para generar obstáculos
+        function createObstacle() {
+            const width = Math.random() * (100 - 20) + 20;
+            const x = Math.random() * (canvas.width - width);
+            obstacles.push({ x, width, y: -20, height: 20 });
+        }
+
+        // Función para dibujar los obstáculos
+        function drawObstacles() {
+            for (let i = 0; i < obstacles.length; i++) {
+                ctx.fillStyle = '#ff0044';
+                ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+            }
+        }
+
+        // Función para mover los obstáculos
+        function moveObstacles() {
+            for (let i = 0; i < obstacles.length; i++) {
+                obstacles[i].y += obstacleSpeed;  // Velocidad reducida de los obstáculos
+            }
+
+            // Eliminar los obstáculos que han salido de la pantalla
+            obstacles.filter(obstacle => obstacle.y < canvas.height);
+        }
+
+        // Función para detectar colisiones
+        function detectCollisions() {
+            for (let i = 0; i < obstacles.length; i++) {
+                if (
+                    spaceship.x < obstacles[i].x + obstacles[i].width &&
+                    spaceship.x + spaceship.width > obstacles[i].x &&
+                    spaceship.y < obstacles[i].y + obstacles[i].height &&
+                    spaceship.y + spaceship.height > obstacles[i].y
+                ) {
+                    endGame();
+                }
+            }
+        }
+
+        // Función para actualizar la puntuación
+        function updateScore() {
+            score++;
+            document.querySelector('.score').textContent = `Puntuación: ${score}`;
+        }
+
+        // Función para finalizar el juego
+        function endGame() {
+            alert(`¡Juego terminado! Tu puntuación es ${score}`);
+            score = 0;
+            obstacles.length = 0;
+            spaceship.x = canvas.width / 2 - 25;
+            spaceship.y = canvas.height - 60;
+            startGame();
+        }
+
+        // Función principal de juego
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSpaceship();
+            moveSpaceship();
+            drawObstacles();
+            moveObstacles();
+            detectCollisions();
+            updateScore();
+            requestAnimationFrame(update);
+        }
+
+        // Función para empezar el juego
+        function startGame() {
+            setInterval(createObstacle, 2000); // Crear obstáculos cada 2 segundos (más lento)
+            update();
+        }
+
+        // Controlar el movimiento de la nave
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') spaceship.dx = -spaceship.speed;
+            if (e.key === 'ArrowRight') spaceship.dx = spaceship.speed;
+        });
+
+        document.addEventListener('keyup', () => {
+            spaceship.dx = 0;
+        });
+
+        startGame();
+    </script>
+</body>
+</html>

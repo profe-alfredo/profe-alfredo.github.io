@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Pasteles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8d7c4;
+        }
+
+        #pastel {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.5s ease;
+        }
+
+        #score {
+            font-size: 24px;
+            color: #333;
+        }
+
+        #highScore {
+            font-size: 24px;
+            color: green;
+        }
+
+        #timer {
+            font-size: 24px;
+            color: red;
+        }
+
+        #gameArea {
+            position: relative;
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            background-color: #fffbf0;
+            overflow: hidden;
+        }
+
+        #restartBtn {
+            display: none;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #restartBtn:hover {
+            background-color: #45a049;
+        }
+
+        #gameOverMessage {
+            font-size: 30px;
+            color: #FF6347;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>¡Juego de Pasteles!</h1>
+    <p>Haz clic en los pasteles para sumar puntos.</p>
+    <div id="score">Puntuación: 0</div>
+    <div id="highScore">Puntuación más alta: 0</div>
+    <div id="timer">Tiempo restante: 40</div>
+    <div id="gameArea"></div>
+    <div id="gameOverMessage">¡Finalizó la partida!</div>
+    <button id="restartBtn" onclick="reiniciarJuego()">Reiniciar Juego</button>
+
+    <script>
+        let score = 0;
+        let highScore = localStorage.getItem('highScore') || 0; // Recupera la puntuación más alta desde el almacenamiento local
+        let timeRemaining = 40;
+        let gameArea = document.getElementById('gameArea');
+        let scoreDisplay = document.getElementById('score');
+        let highScoreDisplay = document.getElementById('highScore');
+        let timerDisplay = document.getElementById('timer');
+        let gameOverMessage = document.getElementById('gameOverMessage');
+        let restartBtn = document.getElementById('restartBtn');
+        let gameInterval, timerInterval;
+
+        // Mostrar la puntuación más alta
+        highScoreDisplay.textContent = "Puntuación más alta: " + highScore;
+
+        // Función para generar un pastel normal en una posición aleatoria
+        function generarPastelNormal() {
+            let pastel = document.createElement('img');
+            pastel.src = 'https://c0.klipartz.com/pngpicture/372/752/gratis-png-pastel-de-cumpleanos-pastel-de-chocolate-glaseado-pastel-de-chocolate-cereza-de-dibujos-animados.png'; // URL de la imagen del pastel
+            pastel.alt = 'Pastel';
+            pastel.width = 80; // Tamaño del pastel más grande
+            pastel.height = 80; // Tamaño del pastel más grande
+            pastel.id = 'pastel';
+            pastel.style.top = Math.random() * (gameArea.clientHeight - 80) + 'px';
+            pastel.style.left = Math.random() * (gameArea.clientWidth - 80) + 'px';
+
+            pastel.onclick = function() {
+                score++;
+                scoreDisplay.textContent = "Puntuación: " + score;
+                gameArea.removeChild(pastel);
+                generarPastelNormal(); // Crear otro pastel normal
+            };
+
+            gameArea.appendChild(pastel);
+
+            // El pastel desaparece después de 3 segundos
+            setTimeout(function() {
+                if (gameArea.contains(pastel)) {
+                    gameArea.removeChild(pastel);
+                    generarPastelNormal(); // Crear otro pastel normal
+                }
+            }, 3000);
+        }
+
+        // Función para generar un pastel especial (más rápido y suma 2 puntos)
+        function generarPastelEspecial() {
+            let pastel = document.createElement('img');
+            pastel.src = 'https://static.vecteezy.com/system/resources/previews/021/498/082/non_2x/simple-blue-birthday-cake-illustration-in-cartoon-style-vector.jpg'; // URL de la imagen del pastel especial
+            pastel.alt = 'Pastel Especial';
+            pastel.width = 60; // Tamaño del pastel más pequeño
+            pastel.height = 60; // Tamaño del pastel más pequeño
+            pastel.id = 'pastelEspecial';
+            pastel.style.position = 'absolute';
+            pastel.style.top = Math.random() * (gameArea.clientHeight - 60) + 'px';
+            pastel.style.left = Math.random() * (gameArea.clientWidth - 60) + 'px';
+
+            pastel.onclick = function() {
+                score += 2; // Este pastel suma 2 puntos
+                scoreDisplay.textContent = "Puntuación: " + score;
+                gameArea.removeChild(pastel);
+                generarPastelEspecial(); // Crear otro pastel especial
+            };
+
+            gameArea.appendChild(pastel);
+
+            // Mover el pastel especial en direcciones aleatorias
+            let dx = (Math.random() - 0.5) * 2; // Movimiento horizontal
+            let dy = (Math.random() - 0.5) * 2; // Movimiento vertical
+
+            function moverPastelEspecial() {
+                let currentTop = parseFloat(pastel.style.top);
+                let currentLeft = parseFloat(pastel.style.left);
+
+                // Cambiar la posición del pastel de manera continua
+                pastel.style.top = currentTop + dy + 'px';
+                pastel.style.left = currentLeft + dx + 'px';
+
+                // Asegurarse de que el pastel se quede dentro del área del juego
+                if (currentTop <= 0 || currentTop >= gameArea.clientHeight - pastel.height) dy = -dy;
+                if (currentLeft <= 0 || currentLeft >= gameArea.clientWidth - pastel.width) dx = -dx;
+            }
+
+            // Mover el pastel especial cada 10ms
+            let moveInterval = setInterval(moverPastelEspecial, 10);
+
+            // El pastel desaparece después de 1.5 segundos (se mueve más rápido)
+            setTimeout(function() {
+                clearInterval(moveInterval); // Detener el movimiento
+                if (gameArea.contains(pastel)) {
+                    gameArea.removeChild(pastel);
+                    generarPastelEspecial(); // Crear otro pastel especial
+                }
+            }, 1500);
+        }
+
+        // Función para actualizar el temporizador
+        function actualizarTemporizador() {
+            timeRemaining--;
+            timerDisplay.textContent = "Tiempo restante: " + timeRemaining;
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);  // Detener el temporizador
+                clearInterval(gameInterval);   // Detener la generación de pasteles
+                // Actualizar la puntuación más alta
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('highScore', highScore); // Guardar la nueva puntuación más alta
+                    highScoreDisplay.textContent = "Puntuación más alta: " + highScore;
+                }
+                gameOverMessage.style.display = 'block';  // Mostrar mensaje de finalización
+                restartBtn.style.display = 'block';  // Mostrar botón de reinicio
+                alert("¡Se acabó el tiempo! Tu puntuación final es: " + score);
+            }
+        }
+
+        // Función para reiniciar el juego
+        function reiniciarJuego() {
+            score = 0;
+            timeRemaining = 40;
+            scoreDisplay.textContent = "Puntuación: " + score;
+            timerDisplay.textContent = "Tiempo restante: " + timeRemaining;
+            gameOverMessage.style.display = 'none';
+            restartBtn.style.display = 'none';
+            // Iniciar el juego de nuevo
+            gameInterval = setInterval(function() {
+                if (Math.random() < 0.3) {  // 30% de que aparezca un pastel especial
+                    generarPastelEspecial();
+                } else {
+                    generarPastelNormal();
+                }
+            }, 2000); // Generar pasteles cada 2 segundos
+
+            // Iniciar el temporizador de 40 segundos
+            timerInterval = setInterval(actualizarTemporizador, 1000);
+        }
+
+        // Iniciar el juego generando pasteles de manera continua
+        gameInterval = setInterval(function() {
+            if (Math.random() < 0.3) {  // 30% de que aparezca un pastel especial
+                generarPastelEspecial();
+            } else {
+                generarPastelNormal();
+            }
+        }, 2000); // Generar pasteles cada 2 segundos
+
+        // Iniciar el temporizador de 40 segundos
+        timerInterval = setInterval(actualizarTemporizador, 1000);
+    </script>
+</body>
+</html>

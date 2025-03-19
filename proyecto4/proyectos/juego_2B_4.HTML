@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuberías</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Portada de inicio */
+        #startPage {
+            background-color: #007BFF;
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .next-button {
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #FF5722;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .next-button:hover {
+            background-color: #ff3d00;
+        }
+
+        /* Página del juego */
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            text-align: center;
+        }
+
+        #levelDisplay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 20px;
+            color: #FF5722;
+        }
+
+        #gameArea {
+            width: 300px;
+            height: 300px;
+            background-color: #eaeaea;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #FF5722;
+            border-radius: 50%;
+        }
+
+        .line {
+            position: absolute;
+            width: 5px;
+            background-color: #007BFF;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Página de Inicio -->
+<div class="game-container" id="startPage">
+    <h1>Tuberías</h1>
+    <p>¡Bienvenido al juego de unir puntos con tuberías!</p>
+    <button class="next-button" id="startBtn">Iniciar Juego</button>
+</div>
+
+<!-- Página de Juego -->
+<div class="game-container" id="gamePage" style="display:none;">
+    <div id="levelDisplay">Nivel: <span id="levelNumber">1</span></div>
+    <div id="gameArea"></div>
+
+    <button class="next-button" id="nextLevelBtn" style="display:none;">Siguiente Nivel</button>
+</div>
+
+<script>
+    const maxLevels = 25; // Número total de niveles
+    let currentLevel = 0;
+    let points = [];
+    let lines = [];
+    let currentLine = null; // Para arrastrar la línea mientras se hace click
+    let isDragging = false; // Para saber si se está arrastrando una línea
+    let levelElement = document.getElementById('levelNumber');
+    const gameArea = document.getElementById('gameArea');
+    const startPage = document.getElementById('startPage');
+    const gamePage = document.getElementById('gamePage');
+    const startButton = document.getElementById('startBtn');
+    const nextButton = document.getElementById('nextLevelBtn');
+
+    // Empieza el juego
+    startButton.addEventListener('click', () => {
+        startPage.style.display = 'none';
+        gamePage.style.display = 'block';
+        playLevel(currentLevel);
+    });
+
+    // Avanzar al siguiente nivel
+    nextButton.addEventListener('click', () => {
+        currentLevel++;
+        if (currentLevel < maxLevels) {
+            levelElement.textContent = currentLevel + 1;
+            gameArea.innerHTML = '';
+            points = [];
+            lines = [];
+            playLevel(currentLevel);
+        } else {
+            alert('¡Juego terminado! Has completado todos los niveles.');
+        }
+    });
+
+    // Función para empezar el nivel
+    function playLevel(level) {
+        generatePoints(level + 3); // Aumenta el número de puntos por nivel
+        drawPoints();
+        resetGameArea();
+    }
+
+    // Genera puntos de forma aleatoria
+    function generatePoints(numPoints) {
+        for (let i = 0; i < numPoints; i++) {
+            const x = Math.random() * (gameArea.offsetWidth - 20) + 10;
+            const y = Math.random() * (gameArea.offsetHeight - 20) + 10;
+            points.push({ x, y });
+        }
+    }
+
+    // Dibuja los puntos en el área de juego
+    function drawPoints() {
+        points.forEach(point => {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            dot.style.left = point.x + 'px';
+            dot.style.top = point.y + 'px';
+            gameArea.appendChild(dot);
+        });
+    }
+
+    // Restablece el área de juego y escucha los clics para conectar puntos
+    function resetGameArea() {
+        gameArea.addEventListener('mousedown', (e) => {
+            const clickedX = e.clientX - gameArea.offsetLeft;
+            const clickedY = e.clientY - gameArea.offsetTop;
+
+            // Verifica si se hizo clic cerca de un punto
+            const clickedPoint = points.find(p => Math.abs(p.x - clickedX) < 15 && Math.abs(p.y - clickedY) < 15);
+            if (clickedPoint) {
+                isDragging = true;
+                currentLine = { x1: clickedPoint.x, y1: clickedPoint.y, x2: clickedX, y2: clickedY };
+            }
+        });
+
+        gameArea.addEventListener('mousemove', (e) => {
+            if (isDragging && currentLine) {
+                const currentX = e.clientX - gameArea.offsetLeft;
+                const currentY = e.clientY - gameArea.offsetTop;
+                currentLine.x2 = currentX;
+                currentLine.y2 = currentY;
+                redrawLines();
+            }
+        });
+
+        gameArea.addEventListener('mouseup', (e) => {
+            if (isDragging && currentLine) {
+                const clickedX = e.clientX - gameArea.offsetLeft;
+                const clickedY = e.clientY - gameArea.offsetTop;
+
+                // Verifica si se hizo clic cerca de otro punto
+                const clickedPoint = points.find(p => Math.abs(p.x - clickedX) < 15 && Math.abs(p.y - clickedY) < 15);
+                if (clickedPoint) {
+                    lines.push(currentLine);
+                    currentLine = null;
+                    points = points.filter(p => !(Math.abs(p.x - clickedX) < 15 && Math.abs(p.y - clickedY) < 15));
+                    redrawLines();
+                }
+
+                isDragging = false;
+                if (points.length === 0) {
+                    alert('¡Nivel completado!');
+                    nextButton.style.display = 'inline-block';
+                }
+            }
+        });
+    }
+
+    // Dibuja las líneas curvas entre los puntos
+    function redrawLines() {
+        gameArea.innerHTML = '';
+        drawPoints(); // Redibuja los puntos
+        lines.forEach(line => {
+            drawCurvedLine(line.x1, line.y1, line.x2, line.y2);
+        });
+
+        if (currentLine) {
+            drawCurvedLine(currentLine.x1, currentLine.y1, currentLine.x2, currentLine.y2);
+        }
+    }
+
+    // Dibuja una línea curva usando una curva de Bézier
+    function drawCurvedLine(x1, y1, x2, y2) {
+        const controlX = (x1 + x2) / 2 + Math.random() * 50 - 25; // Punto de control aleatorio
+        const controlY = (y1 + y2) / 2 + Math.random() * 50 - 25; // Punto de control aleatorio
+
+        const curve = document.createElement('canvas');
+        curve.width = gameArea.offsetWidth;
+        curve.height = gameArea.offsetHeight;
+        gameArea.appendChild(curve);
+        const ctx = curve.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.quadraticCurveTo(controlX, controlY, x2, y2);
+        ctx.strokeStyle = '#007BFF';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+    }
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+

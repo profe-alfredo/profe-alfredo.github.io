@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Pac-Man</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #000;
+            margin: 0;
+            padding: 0;
+        }
+
+        #gameCanvas {
+            border: 2px solid #fff;
+            margin-top: 50px;
+        }
+
+        #score {
+            color: #fff;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 style="color: #fff;">Mini Pac-Man</h1>
+    <canvas id="gameCanvas" width="500" height="500"></canvas>
+    <div id="score">Puntaje: 0</div>
+
+    <script>
+        // Configuración del juego
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 25; // Tamaño de cada celda en el laberinto
+        const totalRows = canvas.height / gridSize;
+        const totalCols = canvas.width / gridSize;
+
+        let playerX = 5, playerY = 5;
+        let score = 0;
+        let ghostX = 10, ghostY = 10;
+        let direction = { x: 0, y: 0 };
+
+        const points = [];
+        let gameInterval;
+
+        // Función para dibujar el jugador (Pac-Man)
+        function drawPlayer() {
+            ctx.beginPath();
+            ctx.arc(playerX * gridSize + gridSize / 2, playerY * gridSize + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'yellow';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Función para dibujar al fantasma
+        function drawGhost() {
+            ctx.beginPath();
+            ctx.arc(ghostX * gridSize + gridSize / 2, ghostY * gridSize + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Función para dibujar los puntos
+        function drawPoints() {
+            for (let point of points) {
+                ctx.beginPath();
+                ctx.arc(point.x * gridSize + gridSize / 2, point.y * gridSize + gridSize / 2, gridSize / 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        // Función para actualizar la posición del jugador
+        function movePlayer() {
+            playerX += direction.x;
+            playerY += direction.y;
+
+            if (playerX < 0) playerX = totalCols - 1;
+            if (playerX >= totalCols) playerX = 0;
+            if (playerY < 0) playerY = totalRows - 1;
+            if (playerY >= totalRows) playerY = 0;
+        }
+
+        // Función para mover al fantasma de manera aleatoria
+        function moveGhost() {
+            const directions = [
+                { x: 1, y: 0 },
+                { x: -1, y: 0 },
+                { x: 0, y: 1 },
+                { x: 0, y: -1 }
+            ];
+            const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+            ghostX += randomDirection.x;
+            ghostY += randomDirection.y;
+
+            if (ghostX < 0) ghostX = totalCols - 1;
+            if (ghostX >= totalCols) ghostX = 0;
+            if (ghostY < 0) ghostY = totalRows - 1;
+            if (ghostY >= totalRows) ghostY = 0;
+        }
+
+        // Función para revisar si el jugador recoge un punto
+        function checkPointCollision() {
+            for (let i = 0; i < points.length; i++) {
+                if (points[i].x === playerX && points[i].y === playerY) {
+                    points.splice(i, 1);
+                    score++;
+                    document.getElementById('score').textContent = 'Puntaje: ' + score;
+                    break;
+                }
+            }
+        }
+
+        // Función para verificar si el jugador toca al fantasma
+        function checkGhostCollision() {
+            if (playerX === ghostX && playerY === ghostY) {
+                clearInterval(gameInterval);
+                alert('¡Game Over! Tu puntaje fue: ' + score);
+            }
+        }
+
+        // Función para actualizar el juego
+        function updateGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            movePlayer();
+            moveGhost();
+            checkPointCollision();
+            checkGhostCollision();
+
+            drawPlayer();
+            drawGhost();
+            drawPoints();
+
+            // Generar puntos aleatorios
+            if (points.length === 0) {
+                const pointCount = Math.floor(Math.random() * 5) + 5;
+                for (let i = 0; i < pointCount; i++) {
+                    const pointX = Math.floor(Math.random() * totalCols);
+                    const pointY = Math.floor(Math.random() * totalRows);
+                    points.push({ x: pointX, y: pointY });
+                }
+            }
+        }
+
+        // Función para controlar la dirección del jugador
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') {
+                direction = { x: 0, y: -1 };
+            } else if (e.key === 'ArrowDown') {
+                direction = { x: 0, y: 1 };
+            } else if (e.key === 'ArrowLeft') {
+                direction = { x: -1, y: 0 };
+            } else if (e.key === 'ArrowRight') {
+                direction = { x: 1, y: 0 };
+            }
+        });
+
+        // Iniciar el juego
+        function startGame() {
+            gameInterval = setInterval(updateGame, 100);
+        }
+
+        startGame();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Golf Estilo Mejorado</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #e0e0e0;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+        canvas {
+            display: block;
+            background-color: #85c67d;
+            margin: 0 auto;
+            border-radius: 10px;
+        }
+        #gameInfo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #333;
+            font-size: 20px;
+        }
+        #powerBarContainer {
+            position: absolute;
+            bottom: 120px;
+            width: 80%;
+            margin: 0 auto;
+            background-color: #ddd;
+            border-radius: 10px;
+            height: 20px;
+            max-width: 500px;
+        }
+        #powerBar {
+            width: 0%;
+            height: 100%;
+            background-color: #4caf50;
+            border-radius: 10px;
+        }
+        #controlPanel {
+            position: absolute;
+            bottom: 40px;
+            width: 80%;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #resetButton {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #resetButton:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameInfo">
+        Golpes: <span id="golpes">0</span> | Nivel: <span id="nivel">1</span> | Tiempo: <span id="time">300</span> segundos
+    </div>
+    <canvas id="golfGame"></canvas>
+    <button id="resetButton" onclick="resetGame()">Reiniciar Juego</button>
+    <div id="powerBarContainer">
+        <div id="powerBar"></div>
+    </div>
+    <div id="controlPanel">
+        <button onclick="increasePower()">Aumentar Potencia</button>
+        <button onclick="shootBall()">Disparar Pelota</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('golfGame');
+        const ctx = canvas.getContext('2d');
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        let holeRadius = 50;
+        let ballRadius = 10;
+        let ballX = width / 2;
+        let ballY = height - 100;
+        let ballSpeedX = 0;
+        let ballSpeedY = 0;
+        let holeX = width / 2;
+        let holeY = 100;
+        let golpeCount = 0;
+        let gameOver = false;
+        let gameTime = 300; // Tiempo ajustado a 5 minutos (300 segundos)
+        let level = 1;
+        let power = 0; // Potencia inicial de disparo
+
+        // Obstáculos (estáticos y dinámicos)
+        const obstacles = [
+            { x: width / 3, y: height / 2, radius: 30, dx: 2, dy: 1, type: 'moving' },
+            { x: width / 1.5, y: height / 2 + 100, radius: 40, dx: -1, dy: -2, type: 'moving' },
+            { x: width / 1.8, y: height / 2 + 200, radius: 50, type: 'static' }
+        ];
+
+        // Función para dibujar la pelota
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#FF5733'; // Color de la pelota
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Función para dibujar el agujero
+        function drawHole() {
+            ctx.beginPath();
+            ctx.arc(holeX, holeY, holeRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#2e2e2e'; // Color del agujero
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Función para dibujar obstáculos
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                ctx.beginPath();
+                ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2);
+                ctx.fillStyle = obstacle.type === 'static' ? '#8B4513' : '#FFD700'; // Color según tipo
+                ctx.fill();
+                ctx.closePath();
+            });
+        }
+
+        // Función para mover obstáculos dinámicos
+        function moveObstacles() {
+            obstacles.forEach(obstacle => {
+                if (obstacle.type === 'moving') {
+                    obstacle.x += obstacle.dx;
+                    obstacle.y += obstacle.dy;
+
+                    // Rebote en los bordes
+                    if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) obstacle.dx *= -1;
+                    if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) obstacle.dy *= -1;
+                }
+            });
+        }
+
+        // Función para verificar si la pelota ha caído en el agujero
+        function checkHoleCollision() {
+            const dist = Math.sqrt((ballX - holeX) ** 2 + (ballY - holeY) ** 2);
+            if (dist < holeRadius + ballRadius) {
+                gameOver = true;
+                alert(`¡Felicidades! Has metido la pelota en el agujero en ${golpeCount} golpes y en ${gameTime} segundos.`);
+            }
+        }
+
+        // Función para verificar si la pelota colisiona con los obstáculos
+        function checkObstacleCollision() {
+            obstacles.forEach(obstacle => {
+                const dist = Math.sqrt((ballX - obstacle.x) ** 2 + (ballY - obstacle.y) ** 2);
+                if (dist < ballRadius + obstacle.radius) {
+                    // Detener la pelota completamente
+                    ballSpeedX = 0;
+                    ballSpeedY = 0;
+                    // Colocar la pelota justo en el borde del obstáculo
+                    const angle = Math.atan2(ballY - obstacle.y, ballX - obstacle.x);
+                    ballX = obstacle.x + Math.cos(angle) * (obstacle.radius + ballRadius);
+                    ballY = obstacle.y + Math.sin(angle) * (obstacle.radius + ballRadius);
+                    alert('La pelota ha chocado con un obstáculo.');
+                }
+            });
+        }
+
+        // Función para actualizar el tiempo
+        function updateTime() {
+            if (!gameOver && gameTime > 0) {
+                gameTime--;
+                document.getElementById('time').innerText = gameTime;
+            } else if (gameTime <= 0) {
+                gameOver = true;
+                alert('Se acabó el tiempo. ¡Perdiste!');
+            }
+        }
+
+        // Llamar a updateTime cada segundo (1000 ms)
+        setInterval(updateTime, 1000); // Actualiza el tiempo cada segundo
+
+        // Función de actualización del juego
+        function updateGame() {
+            if (gameOver) return;
+
+            // Mover la pelota
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Físicas básicas (arrastre y gravedad)
+            ballSpeedX *= 0.99;
+            ballSpeedY *= 0.99;
+            if (Math.abs(ballSpeedX) < 0.1) ballSpeedX = 0;
+            if (Math.abs(ballSpeedY) < 0.1) ballSpeedY = 0;
+
+            // Verificar si la pelota ha caído en el agujero
+            checkHoleCollision();
+
+            // Verificar colisiones con obstáculos
+            checkObstacleCollision();
+
+            // Mover obstáculos dinámicos
+            moveObstacles();
+
+            // Dibujar el campo de golf
+            ctx.clearRect(0, 0, width, height);
+            drawHole();
+            drawBall();
+            drawObstacles();
+
+            // Actualizar el contador de golpes
+            document.getElementById('golpes').innerText = golpeCount;
+
+            // Llamar la siguiente actualización
+            requestAnimationFrame(updateGame);
+        }
+
+        // Función para aumentar la potencia
+        function increasePower() {
+            if (power < 100) {
+                power++;
+

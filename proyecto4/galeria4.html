@@ -84,7 +84,7 @@
 </head>
 <body>
     <h1>Galería de Proyectos de Estudiantes</h1>
-    <h2 class="subtitle">Proyecto 4: Juego web</h2>
+    <h2 class="subtitle">Proyecto 1: Primera página web con IA</h2>
 
     <form id="uploadForm">
         <input type="text" id="projectTitle" placeholder="Título del proyecto" required />
@@ -93,17 +93,21 @@
         <button type="submit">Subir Proyecto</button>
     </form>
 
-    <div class="project-container" id="projectContainer">
-        <!-- Aquí se insertarán las tarjetas de los proyectos mediante JavaScript -->
-    </div>
+    <div class="project-container" id="projectContainer"></div>
 
     <script>
         const projects = [
-            {
-                title: "Ejemplo",
-                description: "Juego de pong creado por el profe Alfredo.",
-                link: "proyectos/pong_ejemplo.html"
-            }
+            { title: "Ejemplo", description: "Juego ejemplo de Pong del profe Alfredo", link: "proyectos/pong_ejemplo" },
+            { title: "Juego de Tetris", description: "Juego de Tetris construido con IA por Santiago", link: "proyectos/juego_2B_6.html" },
+            { title: "juego del futuro", description: "juego del futuro contruido con IA kira", link: "proyectos/juego_2B_12.html" },
+            { title: "Juego de Snake", description: "Juego de Snake que se trata de comer manzanas sin que te choques contigo o las paredes construido con IA por Jorge", link: "proyectos/juego_2B_9.html" },
+            { title: "juego de memorama", description: "juego de memorama construido con IA juno", link: "proyectos/juego_2B_11.html" },
+            { title: "juego de pasteles", description: "juego de pasteles generado con IA por Luna", link: "proyectos/juego_2B_10.html" },
+            { title: "Juego web de Golf", description: "Se trata de un juego de golf que tiene obstáculos y tiempo creado por IanPablo", link: "proyectos/juego_2B_1.html" },
+            { title: "Juego de Pacman", description: "Juego de Pacman construido con IA por Carlos", link: "proyectos/juego_2B_5.html" },
+            { title: "Juego de Tuberías", description: "Juego de unir puntos creado por IA por Dasha", link: "proyectos/juego_2B_4.html" },
+            { title: "Juego web de esquivar cubos", description: "Tienes que desplazarte para que los cubos no te toquen, y va subiendo la intensidad", link: "proyectos/juego_2B_html" },
+            { title: "Juego web tic tac toe", description: "Juego que se trata de de completar un línea en forma horizontal, vertical o diagonal con el mismo elemento.", link: "proyectos/juego_2B_3.html" }
         ];
 
         const container = document.getElementById('projectContainer');
@@ -124,23 +128,13 @@
 
         document.getElementById('uploadForm').addEventListener('submit', (event) => {
             event.preventDefault();
-
             const title = document.getElementById('projectTitle').value;
             const description = document.getElementById('projectDescription').value;
             const file = document.getElementById('projectFile').files[0];
-
             if (file) {
                 const newProjectLink = URL.createObjectURL(file);
-
-                projects.push({
-                    title: title,
-                    description: description,
-                    link: newProjectLink
-                });
-
+                projects.push({ title, description, link: newProjectLink });
                 renderProjects();
-
-                // Limpiar el formulario
                 document.getElementById('uploadForm').reset();
             }
         });

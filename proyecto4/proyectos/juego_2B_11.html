@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memorama con Puntos</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        .tablero { display: grid; grid-template-columns: repeat(4, 100px); gap: 10px; justify-content: center; }
+        .carta { width: 100px; height: 100px; background: gray; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .oculta { background: black; color: black; }
+    </style>
+</head>
+<body>
+    <h1>Memorama</h1>
+    <h2>Puntos: <span id="puntos">0</span></h2>
+    <div class="tablero" id="tablero"></div>
+    <script>
+        const cartas = ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'];
+        let mezcladas = cartas.sort(() => 0.5 - Math.random());
+        let seleccionadas = [];
+        let puntos = 0;
+        
+        function crearTablero() {
+            const tablero = document.getElementById("tablero");
+            mezcladas.forEach((letra, index) => {
+                let carta = document.createElement("div");
+                carta.classList.add("carta", "oculta");
+                carta.dataset.valor = letra;
+                carta.dataset.index = index;
+                carta.addEventListener("click", voltearCarta);
+                tablero.appendChild(carta);
+            });
+        }
+
+        function voltearCarta() {
+            if (seleccionadas.length < 2 && this.classList.contains("oculta")) {
+                this.textContent = this.dataset.valor;
+                this.classList.remove("oculta");
+                seleccionadas.push(this);
+            }
+            
+            if (seleccionadas.length === 2) {
+                setTimeout(verificarPareja, 500);
+            }
+        }
+        
+        function verificarPareja() {
+            if (seleccionadas[0].dataset.valor === seleccionadas[1].dataset.valor) {
+                puntos += 10;
+                document.getElementById("puntos").textContent = puntos;
+            } else {
+                seleccionadas.forEach(carta => {
+                    carta.textContent = "";
+                    carta.classList.add("oculta");
+                });
+            }
+            seleccionadas = [];
+        }
+        
+        crearTablero();
+    </script>
+</body>
+</html>
