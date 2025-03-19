@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Galería de Proyectos de Estudiantes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2.subtitle {
+            text-align: center;
+            color: #555;
+            font-weight: normal;
+            margin-bottom: 20px;
+        }
+        .project-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .project-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+        .project-card h2 {
+            font-size: 1.2em;
+            color: #007BFF;
+            margin-bottom: 10px;
+        }
+        .project-card p {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .project-card a {
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+        .project-card a:hover {
+            background-color: #0056b3;
+        }
+        form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        input[type="text"], input[type="file"], button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Galería de Proyectos de Estudiantes</h1>
+    <h2 class="subtitle">Proyecto 4: Juego web</h2>
+
+    <form id="uploadForm">
+        <input type="text" id="projectTitle" placeholder="Título del proyecto" required />
+        <input type="text" id="projectDescription" placeholder="Descripción" required />
+        <input type="file" id="projectFile" accept=".html" required />
+        <button type="submit">Subir Proyecto</button>
+    </form>
+
+    <div class="project-container" id="projectContainer">
+        <!-- Aquí se insertarán las tarjetas de los proyectos mediante JavaScript -->
+    </div>
+
+    <script>
+        const projects = [
+            {
+                title: "Ejemplo",
+                description: "Juego de pong creado por el profe Alfredo.",
+                link: "proyectos/pong_ejemplo.html"
+            }
+        ];
+
+        const container = document.getElementById('projectContainer');
+
+        function renderProjects() {
+            container.innerHTML = '';
+            projects.forEach(project => {
+                const card = document.createElement('div');
+                card.classList.add('project-card');
+                card.innerHTML = `
+                    <h2>${project.title}</h2>
+                    <p>${project.description}</p>
+                    <a href="${project.link}" target="_blank">Ver proyecto</a>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const title = document.getElementById('projectTitle').value;
+            const description = document.getElementById('projectDescription').value;
+            const file = document.getElementById('projectFile').files[0];
+
+            if (file) {
+                const newProjectLink = URL.createObjectURL(file);
+
+                projects.push({
+                    title: title,
+                    description: description,
+                    link: newProjectLink
+                });
+
+                renderProjects();
+
+                // Limpiar el formulario
+                document.getElementById('uploadForm').reset();
+            }
+        });
+
+        renderProjects();
+    </script>
+</body>
+</html>
