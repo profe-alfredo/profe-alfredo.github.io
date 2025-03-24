@@ -1,0 +1,121 @@
+/* Estilos Cyberpunk */
+body {
+    font-family: 'Courier New', monospace;
+    background-color: #0d0d0d;
+    color: #0ff;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+}
+
+header {
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
+    color: #000;
+    padding: 20px;
+    font-size: 24px;
+    text-transform: uppercase;
+    text-shadow: 0 0 5px #fff, 0 0 10px #0ff;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 10px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #ff00ff;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+}
+
+main {
+    padding: 20px;
+    border: 2px solid #0ff;
+    box-shadow: 0 0 10px #0ff;
+    background: rgba(0, 0, 0, 0.8);
+    margin: 20px;
+}
+
+footer {
+    background-color: #111;
+    color: #0ff;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    text-shadow: 0 0 5px #0ff;
+}
+
+/* Estilos para los botones */
+button {
+    background-color: #444; /* Fondo oscuro para los botones */
+    color: #fff;
+    border: 2px solid #ccc;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: url('lebron-cursor.png'), auto; /* Reemplaza con la URL de la imagen del cursor */
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+    background-color: #333; /* Cambio de fondo cuando pasa el ratón */
+    transform: scale(1.1); /* Animación de ampliación */
+}
+
+/* Estilo para el botón de cambio de color y tipografía */
+#style1 {
+    background-color: #c21f3f;
+}
+
+#style2 {
+    background-color: #3dc499;
+}
+
+#style3 {
+    background-color: #3d9bc4;
+}
+
+/* Cambios de estilo con clases activadas */
+.color1 {
+    color: #c21f3f;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.color2 {
+    color: #3dc499;
+    font-family: 'Georgia', serif;
+}
+
+.color3 {
+    color: #3d9bc4;
+    font-family: 'Tahoma', sans-serif;
+}
+
+/* Cambios cuando se hace clic en los botones */
+#style1:active ~ .content {
+    color: #c21f3f;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#style2:active ~ .content {
+    color: #3dc499;
+    font-family: 'Georgia', serif;
+}
+
+#style3:active ~ .content {
+    color: #3d9bc4;
+    font-family: 'Tahoma', sans-serif;
+}

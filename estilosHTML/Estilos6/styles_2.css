@@ -1,0 +1,93 @@
+/* Archivo styles.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600&display=swap');
+
+body {
+    font-family: 'Lexend', sans-serif;
+    background-image: url('https://i.pinimg.com/736x/dc/58/b7/dc58b7108e3daf91fe83077650e212b5.jpg');
+    background-size: cover;
+    background-position: center;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    color: #ffffff;
+}
+
+header {
+    background-color: transparent; /* Eliminado el color morado */
+    color: #ffb6c1; /* Rosa pastel */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.3);
+    position: relative;
+}
+
+header::before {
+    content: "";
+    background-image: url('https://i.pinimg.com/originals/f5/ed/17/f5ed17d3b672c58e2dad1cc6970375a0.gif');
+    background-size: cover;
+    background-position: center;
+    height: 200px;
+    width: 100%;
+    position: absolute;
+    top: -50px;
+    left: 0;
+    z-index: -1;
+    border-radius: 10px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 10px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #ffb6c1; /* Rosa pastel */
+    font-weight: bold;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: #ffffff;
+}
+
+main {
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro con transparencia */
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 255, 0.5);
+    max-width: 90%;
+    margin: auto;
+}
+
+footer {
+    background-color: transparent; /* Eliminado el color morado */
+    color: 
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    border-top: 1px solid #ffb6c1; /* Rosa pastel */
+}
+
+h1, h2 {
+    text-shadow: 0 0 10px rgba(255, 182, 193, 0.8); /* Rosa pastel */
+}
+
+a {
+    text-decoration: none;
+    color: #ffb6c1; /* Rosa pastel */
+}
+
+a:hover {
+    color: 
+    text-decoration: underline;
+}
+

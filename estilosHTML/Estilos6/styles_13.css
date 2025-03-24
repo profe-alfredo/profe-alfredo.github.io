@@ -1,0 +1,111 @@
+/* Archivo styles.css */
+
+/* Estilos generales */
+body {
+    font-family: 'Helvetica', sans-serif;
+    background-color: #ffffff; /* Fondo blanco */
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    color: #333333;
+}
+
+/* Header */
+header {
+    background-color: #4a90e2; /* Azul elegante */
+    color: white;
+    padding: 30px;
+    border-bottom: 3px solid #357ab7; /* Azul más oscuro para el borde */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Títulos en el header */
+header h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Navegación */
+nav {
+    background-color: #357ab7; /* Azul oscuro para el fondo del menú */
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* Asegura que el menú esté siempre encima */
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 10px;
+    display: inline-block;
+    transition: color 0.3s, background-color 0.3s;
+}
+
+nav ul li a:hover {
+    color: #ffffff; /* Color blanco al pasar el ratón */
+    background-color: #4a90e2; /* Azul más claro al hacer hover */
+    border-radius: 5px;
+}
+
+/* Contenido principal */
+main {
+    padding: 50px 20px;
+    background-color: #f9f9f9; /* Fondo suave gris claro */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin: 20px;
+}
+
+/* Títulos dentro del main */
+main h2 {
+    color: #4a90e2; /* Azul claro para los subtítulos */
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* Párrafos dentro del main */
+main p {
+    color: #333333; /* Texto oscuro para buen contraste */
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+/* Pie de página */
+footer {
+    background-color: #222;
+    color: white;
+    padding: 15px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Enlaces en el footer */
+footer a {
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+footer a:hover {
+    color: #357ab7; /* Azul más oscuro al pasar el ratón */
+}

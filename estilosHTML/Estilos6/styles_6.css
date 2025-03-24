@@ -1,0 +1,60 @@
+/* Importando la fuente desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+* {
+    padding: 0;
+    text-align: center;
+    margin: 0;
+    font-family: 'Playfair Display', serif; /* Fuente elegante */
+}
+
+header {
+    background: #8B0000; /* Rojo oscuro */
+    color: #fff8e1; /* Blanco cálido para el texto */
+    padding: 20px;
+}
+
+nav {
+    background-color: #B22222; /* Fondo rojo para el menú */
+    padding: 10px 0; /* Espaciado en el menú */
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center; /* Centra los elementos del menú */
+    gap: 20px; /* Espaciado entre los elementos */
+}
+
+nav ul li {
+    display: inline;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #ffffff; /* Blanco brillante para los enlaces */
+    font-weight: bold;
+    font-size: 1.2em; /* Tamaño de letra más grande */
+    transition: color 0.3s ease;
+    padding: 10px 20px; /* Espacio alrededor del texto */
+    display: inline-block; /* Asegura que el padding funcione correctamente */
+}
+
+nav ul li a:hover {
+    color: #FFD700; /* Amarillo dorado cuando se pasa el cursor */
+}
+
+main {
+    padding: 20px;
+}
+
+footer {
+    background-color: #222;
+    color: #fff8e1; /* Blanco cálido en el footer */
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
