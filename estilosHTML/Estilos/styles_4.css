@@ -1,0 +1,107 @@
+/* Reset de márgenes y padding para evitar inconsistencias */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Estilo general del cuerpo de la página */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f8ff; /* Fondo azul claro */
+  color: #333; /* Color de texto */
+  line-height: 1.6;
+  padding: 20px;
+}
+
+/* Estilos para la cabecera */
+header {
+  background-color: #003366; /* Azul oscuro */
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 3em;
+  font-weight: bold;
+}
+
+/* Estilos para los enlaces */
+a {
+  color: #003366; /* Azul oscuro para los enlaces */
+  text-decoration: none;
+}
+
+a:hover {
+  color: #005bb5; /* Azul más brillante al pasar el mouse */
+  text-decoration: underline;
+}
+
+/* Barra de navegación */
+nav {
+  background-color: #005bb5; /* Azul brillante */
+  padding: 10px;
+  text-align: center;
+}
+
+nav a {
+  color: white;
+  padding: 10px 20px;
+  margin: 0 10px;
+  text-transform: uppercase;
+}
+
+nav a:hover {
+  background-color: #003366; /* Azul oscuro al pasar el mouse */
+}
+
+/* Estilos para las secciones principales */
+section {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+
+section p {
+  font-size: 1.1em;
+  line-height: 1.8;
+}
+
+/* Estilo para los botones */
+button {
+  background-color: #007bff; /* Azul brillante */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3; /* Azul más oscuro */
+}
+
+/* Estilos para el pie de página */
+footer {
+  background-color: #003366; /* Azul oscuro */
+  color: white;
+  padding: 10px;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+footer p {
+  font-size: 0.9em;
+}

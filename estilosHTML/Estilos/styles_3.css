@@ -1,0 +1,117 @@
+/* Resetear márgenes y padding por defecto */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Estilo global para el cuerpo */
+body {
+  font-family: 'Arial', sans-serif;
+  background: #FA4C00; /* Fondo claro */
+  color: #100
+  ;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* Encabezado */
+header {
+  background: linear-gradient(135deg, #6F7AFA, #feb47b); /* Degradado de colores cálidos */
+  color: #FAAF2D;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  font-size: 3rem;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Sombra en el texto */
+}
+
+/* Navegación */
+nav {
+  background: #906EFA; /* Verde brillante */
+  display: flex;
+  justify-content: center;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+nav a {
+  color: #xxx;
+  text-decoration: none;
+  padding: 12px 25px;
+  margin: 0 15px;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+nav a:hover {
+  background-color: #ff7e5f; /* Cambio de color en hover */
+  transform: scale(1.1); /* Efecto de aumento */
+}
+
+/* Sección principal */
+main {
+  padding: 40px;
+}
+
+section {
+  margin-bottom: 30px;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+section:hover {
+  transform: translateY(-5px); /* Efecto al pasar el ratón */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+section h2 {
+  font-size: 2rem;
+  color: #ff7e5f;
+  margin-bottom: 15px;
+}
+
+section p {
+  font-size: 1.2rem;
+  color: #777;
+  line-height: 1.8;
+}
+
+/* Estilo de imágenes */
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Pie de página */
+footer {
+  background: #333;
+  color: #70A7FA;
+  text-align: center;
+  padding: 20px;
+  font-size: 1rem;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+footer a {
+  color: #FA4C00;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,53 @@
+/* Archivo styles.css */
+
+/* Fondo general y estilo de fuente */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f7fa; /* Fondo azul claro */
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+/* Estilo del encabezado */
+header {
+    background-color: #0277bd; /* Azul fuerte */
+    color: white;
+    padding: 20px;
+}
+
+/* Estilo de la navegación */
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 10px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #01579b; /* Azul más oscuro */
+    font-weight: bold;
+}
+
+nav ul li a:hover {
+    color: #0288d1; /* Azul más brillante al pasar el ratón */
+}
+
+/* Estilo del contenido principal */
+main {
+    padding: 20px;
+}
+
+/* Estilo del pie de página */
+footer {
+    background-color: #01579b; /* Azul oscuro */
+    color: white;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}

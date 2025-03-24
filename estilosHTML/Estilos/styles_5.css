@@ -1,0 +1,77 @@
+/* Establece el fondo general de la página */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #A7CAE9; /* Beige claro */
+    color: #6F6EB2; /* Texto en un gris oscuro */
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilo del encabezado */
+header {
+    background-color: #3498db; /* Azul vibrante */
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+}
+
+/* Estilo de los enlaces */
+a {
+    color: #3498db; /* Azul en los enlaces */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Estilo de los botones */
+button {
+    background-color: #3DC2EB; /* Azul oscuro */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #2980b9; /* Azul más claro al pasar el ratón */
+}
+
+/* Estilo de la barra de navegación */
+nav {
+    background-color: #ecf0f1; /* Beige muy claro */
+    padding: 10px;
+    text-align: center;
+}
+
+nav a {
+    margin: 0 15px;
+    color: #89AFEB;
+    font-weight: bold;
+}
+
+/* Estilo del contenido principal */
+main {
+    padding: 30px;
+    background-color: #EDE2CC; /* Fondo blanco */
+}
+
+/* Estilo de los cuadros de información o tarjetas */
+.card {
+    background-color: #3B7FEB; /* Fondo beige muy claro */
+    border: 1px solid #ddd; /* Bordes suaves */
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo del pie de página */
+footer {
+    background-color:#3DC2EB; /* Azul vibrante */
+    color: #fff;
+    text-align: center;
+    padding: 15px 0;
+}

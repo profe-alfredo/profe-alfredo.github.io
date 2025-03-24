@@ -1,0 +1,75 @@
+/* Archivo styles.css */
+
+/* Establece una fuente más moderna para todo el cuerpo */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #5e5e5
+      ;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+/* Estilo del encabezado */
+header {
+    background-color: #ff5722;  /* Un tono de naranja */
+    color: white;
+    padding: 30px;
+    border-bottom: 5px solid #333;
+}
+
+/* Estilo del menú de navegación */
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #333;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline;
+    margin: 15px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+nav ul li a:hover {
+    color: #ff5722;  /* Efecto hover: color naranja */
+}
+
+/* Estilo para el contenido principal */
+main {
+    padding: 40px 20px;
+}
+
+main h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+main p {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* Estilo del pie de página */
+footer {
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    text-align: center;
+    font-size: 14px;
+}
+
+footer p {
+    margin: 0;
