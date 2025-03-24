@@ -1,0 +1,56 @@
+/* Estilos Luna 2B*/
+
+body {
+    font-family: 'Courier New', monospace;
+    background-color: #f9e79f;
+    color: #ec7063;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: linear-gradient(90deg, #e6b0aa, #f0b27a);
+    color: #fbfcfc;
+    padding: 20px;
+    font-size: 24px;
+    text-transform: uppercase;
+    text-shadow: 0 0 5px #ec7063, 0 0 10px #ec7063;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 10px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #fbfcfc;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 0 0 5px #ec7063, 0 0 10px #ec7063;
+}
+
+main {
+    padding: 20px;
+    border: 2px solid #ec7063;
+    box-shadow: 0 0 10px #ec7063;
+    background: rgba (0, 0, 0, 0.8);
+    margin: 20px;
+}
+
+footer {
+    background-color: #f5b7b1;
+    color: #fbfcfc;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    text-shadow: 0 0 5px #ec7063;
+} 
+

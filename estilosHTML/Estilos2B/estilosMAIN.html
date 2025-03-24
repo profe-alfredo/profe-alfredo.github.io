@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Primera Página Web</title>
+    <link id="themeStylesheet" rel="stylesheet" href="styles_1.css">
+</head>
+<body>
+    <header>
+        <h1>Bienvenido a Mi Página Web</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#">Inicio</a></li>
+            <li><a href="#">Acerca de</a></li>
+            <li><a href="#">Contacto</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section>
+            <h2>Aprendiendo CSS</h2>
+            <p>Modifica los archivos CSS para cambiar los colores, fuentes y diseño de esta página.</p>
+        </section>
+        <button onclick="cambiarEstilo()">Cambiar Estilo</button>
+    </main>
+    <footer>
+        <p>&copy; 2025 Mi Página Web</p>
+    </footer>
+    
+    <script>
+        const estilos = [];
+        for (let i = 1; i <= 12; i++) {
+            estilos.push(`styles_${i}.css`);
+        }
+        let indiceActual = 0;
+        
+        function cambiarEstilo() {
+            indiceActual = (indiceActual + 1) % estilos.length;
+            document.getElementById("themeStylesheet").href = estilos[indiceActual];
+        }
+    </script>
+</body>
+</html>

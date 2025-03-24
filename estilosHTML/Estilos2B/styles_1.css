@@ -1,0 +1,56 @@
+/* Estilos Ian Pablo 2B */
+
+body {
+    font-family: 'Arial', monospace;
+    background-color: #FFFFF;
+    color: #0ff;
+    text-align: center;
+    margin: 10;
+    padding: 10;
+}
+
+header {
+    background: linear-gradient(200deg, #f27b86, #7baaf2);
+    color: #FFFFFF;
+    padding: 10px;
+    font-size: 20px;
+    text-transform: uppercase;
+    text-shadow: 0 0 50px #94beff, 0 0 10px #295caa;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: INline;
+    margin: 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 20px;
+    text-shadow: 0 0 5px #ffb2a1, 0 0 10px #ff6745;
+}
+
+main {
+    padding: 20px;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 0 10px #0ff;
+    background: rgba(0, 0, 0, 0.8);
+    margin: 20px;
+}
+
+footer {
+    background-color: #33d4ff;
+    color: #FFFFFF;
+    padding: 5px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    text-shadow: 0 0 5px #830a15;
+} 
+
