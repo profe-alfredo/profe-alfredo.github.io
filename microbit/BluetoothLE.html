@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>micro:bit Bluetooth Control</title>
+</head>
+<body>
+  <h2>Control micro:bit por Bluetooth</h2>
+  <button onclick="conectar()">Conectar</button>
+  <button onclick="enviar('A\n')">Enviar A</button>
+  <button onclick="enviar('B\n')">Enviar B</button>
+
+<script>
+let characteristic;
+
+async function conectar() {
+  const device = await navigator.bluetooth.requestDevice({
+    filters: [{ namePrefix: "BBC micro:bit" }],
+    optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e']
+  });
+
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService(
+    '6e400001-b5a3-f393-e0a9-e50e24dcca9e'
+  );
+
+  characteristic = await service.getCharacteristic(
+    '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
+  );
+
+  alert("Conectado al micro:bit");
+}
+
+async function enviar(texto) {
+  const encoder = new TextEncoder();
+  await characteristic.writeValue(encoder.encode(texto));
+}
+</script>
+</body>
+</html>
