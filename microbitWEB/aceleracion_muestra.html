@@ -122,8 +122,29 @@
 // Importamos directamente WebUSBConnection (o todo el espacio de nombres por seguridad)
 import * as microbitConnection from "https://esm.sh/@microbit/microbit-connection";
 
-// Soporte tanto para la clase WebUSBConnection como para la función de fábrica
-const ConnectionClass = microbitConnection.WebUSBConnection || microbitConnection.createWebUSBConnection;
+// ==========================================
+// FUNCIÓN PARA CREAR LA CONEXIÓN WEBUSB
+// ==========================================
+function crearConexionWebUSB() {
+  const mb = microbitConnection.default || microbitConnection;
+
+  // 1. Llamada a la función de fábrica oficial (SIN 'new')
+  if (typeof mb.createWebUSBConnection === 'function') {
+    return mb.createWebUSBConnection();
+  }
+  
+  // 2. Respaldo en caso de que exporte como clase
+  if (typeof mb.WebUSBConnection === 'function') {
+    try {
+      return new mb.WebUSBConnection();
+    } catch {
+      return mb.WebUSBConnection();
+    }
+  }
+
+  console.error("Propiedades exportadas disponibles:", Object.keys(mb));
+  throw new Error("No se encontró el método de conexión WebUSB en la librería.");
+}
 
 // ==========================================
 // 1. PROGRAMACIÓN DEL MICRO:BIT VÍA WEBUSB
@@ -140,21 +161,21 @@ flashBtn.addEventListener('click', async () => {
     flashProgressBar.value = 0;
     flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
 
-    // 1. Instanciamos la conexión y abrimos el selector USB inmediatamente al hacer clic
-    const connection = new ConnectionClass();
+    // Instanciamos llamando a la fábrica y abrimos el selector USB
+    const connection = crearConexionWebUSB();
     await connection.connect();
 
-    // 2. Con el micro:bit ya emparejado por USB, descargamos el archivo .hex
+    // Con el micro:bit ya emparejado por USB, descargamos el archivo .hex
     flashStatus.textContent = "Cargando firmware.hex...";
     const response = await fetch('./firmware.hex');
     if (!response.ok) {
-      throw new Error("No se encontró el archivo './firmware.hex'. Asegúrate de que esté en la misma carpeta que este HTML.");
+      throw new Error("No se encontró './firmware.hex'. Asegúrate de que esté en la misma carpeta que este HTML.");
     }
     const hexData = await response.text();
 
     flashStatus.textContent = "Flasheando micro:bit (0%)...";
 
-    // 3. Escribimos la memoria Flash
+    // Escribimos la memoria Flash
     await connection.flash(hexData, (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
