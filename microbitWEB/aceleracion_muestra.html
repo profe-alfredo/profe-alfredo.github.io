@@ -125,7 +125,6 @@ const flashStatus = document.getElementById('flashStatus');
 const flashProgressArea = document.getElementById('flashProgressArea');
 const flashProgressBar = document.getElementById('flashProgressBar');
 
-// Función auxiliar para cargar scripts UMD con respaldo entre CDNs
 function cargarScript(url) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -136,26 +135,76 @@ function cargarScript(url) {
   });
 }
 
+// Filtra y prepara el archivo HEX para que DAPLink lo acepte sin errores
+function prepararHexParaMicrobit(hexTexto, serialNumber) {
+  const prefijo = serialNumber ? serialNumber.slice(0, 4) : "";
+  const esV2 = ["9903", "9904", "9905", "9906"].includes(prefijo);
+  const esV1 = ["9900", "9901"].includes(prefijo);
+
+  // 1. Si es un Universal HEX (múltiples cierres EOF), extraer solo el bloque de la placa conectada
+  if (hexTexto.includes(":00000001FF")) {
+    const bloques = hexTexto.split(":00000001FF");
+    if (bloques.length > 2) {
+      let bloqueElegido = "";
+      for (const b of bloques) {
+        if (!b.trim()) continue;
+        if (esV2 && (b.includes("0400000A9903") || b.includes("0400000A9904") || b.includes("0400000A9905") || b.includes("0400000A9906"))) {
+          bloqueElegido = b;
+          break;
+        }
+        if (esV1 && (b.includes("0400000A9900") || b.includes("0400000A9901"))) {
+          bloqueElegido = b;
+          break;
+        }
+      }
+      if (!bloqueElegido) {
+        bloqueElegido = esV2 ? (bloques[1] || bloques[0]) : bloques[0];
+      }
+      hexTexto = bloqueElegido + ":00000001FF\r\n";
+    }
+  }
+
+  // 2. Limpiar registros no estándar (como :0400000A) que provocan el 'Flash error'
+  const lineas = hexTexto.split(/\r?\n/);
+  const lineasValidas = [];
+  for (let linea of lineas) {
+    linea = linea.trim();
+    if (!linea.startsWith(":")) continue;
+    if (linea.startsWith(":0400000A")) continue; // Eliminar cabecera propietaria
+    lineasValidas.push(linea);
+  }
+
+  // 3. Garantizar cierre oficial EOF
+  if (!lineasValidas[lineasValidas.length - 1].includes(":00000001FF")) {
+    lineasValidas.push(":00000001FF");
+  }
+
+  // 4. Unir estrictamente con \r\n (CRLF obligatorio para el decodificador C)
+  return lineasValidas.join("\r\n") + "\r\n";
+}
+
 flashBtn.addEventListener('click', async () => {
+  let device = null;
+  let target = null;
+
   try {
     flashBtn.disabled = true;
     flashProgressArea.style.display = "flex";
     flashProgressBar.value = 0;
     flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
 
-    // 1. Abrir diálogo nativo USB en el primer milisegundo del clic (gesto de usuario)
-    const device = await navigator.usb.requestDevice({
+    // 1. Selector WebUSB (filtro micro:bit 0x0d28)
+    device = await navigator.usb.requestDevice({
       filters: [{ vendorId: 0x0d28 }]
     });
 
-    // 2. Garantizar que DAPjs esté disponible en memoria
+    // 2. Comprobar librería DAPjs
     let DAP = window.DAPjs || window.dapjs;
     if (!DAP) {
       flashStatus.textContent = "Cargando motor DAPLink...";
       try {
         await cargarScript('https://cdn.jsdelivr.net/npm/dapjs/dist/dap.umd.js');
       } catch {
-        // Respaldo secundario si jsDelivr tiene problemas
         await cargarScript('https://unpkg.com/dapjs/dist/dap.umd.js');
       }
       DAP = window.DAPjs || window.dapjs;
@@ -165,19 +214,22 @@ flashBtn.addEventListener('click', async () => {
       throw new Error("No se pudo inicializar la librería DAPjs.");
     }
 
-    // 3. Descargar el firmware .hex ubicado junto al HTML
+    // 3. Descargar el archivo firmware.hex
     flashStatus.textContent = "Cargando firmware.hex...";
-    const response = await fetch('./microbit-Bluetooth-Control.hex');
+    const response = await fetch('./firmware.hex');
     if (!response.ok) {
-      throw new Error("No se encontró './firmware.hex'. Asegúrate de que el archivo esté en la misma carpeta que este HTML.");
+      throw new Error("No se encontró './firmware.hex'. Asegúrate de que esté en la misma carpeta.");
     }
-    const hexData = await response.text();
+    const hexDataOriginal = await response.text();
 
-    // 4. Conectar y flashear
+    // 4. Sanitizar y adaptar el HEX a la placa detectada
+    flashStatus.textContent = "Adaptando formato para micro:bit...";
+    const hexProcesado = prepararHexParaMicrobit(hexDataOriginal, device.serialNumber);
+
+    // 5. Iniciar flasheo con DAPLink
     const transport = new DAP.WebUSB(device);
-    const target = new DAP.DAPLink(transport);
+    target = new DAP.DAPLink(transport);
 
-    // Escuchar el porcentaje de avance
     target.on('progress', (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
@@ -189,8 +241,10 @@ flashBtn.addEventListener('click', async () => {
 
     flashStatus.textContent = "Escribiendo en memoria Flash...";
     const enc = new TextEncoder();
-    // Enviamos el buffer codificado del archivo .hex
-    await target.flash(enc.encode(hexData));
+    const bufferBinario = enc.encode(hexProcesado);
+
+    // Pasamos el ArrayBuffer depurado
+    await target.flash(bufferBinario.buffer);
 
     flashProgressBar.value = 100;
     flashStatus.textContent = "¡micro:bit programado con éxito!";
@@ -200,6 +254,12 @@ flashBtn.addEventListener('click', async () => {
     flashStatus.textContent = "Error: " + error.message;
     alert("Fallo al programar: " + error.message);
   } finally {
+    if (target) {
+      try { await target.disconnect(); } catch (e) {}
+    }
+    if (device && device.opened) {
+      try { await device.close(); } catch (e) {}
+    }
     flashBtn.disabled = false;
   }
 });
