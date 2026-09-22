@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>micro:bit — Flasheo USB y Captura de Movimiento</title>
-  <!-- Librería DAPjs oficial sin versión inexistente -->
-  <script src="https://cdn.jsdelivr.net/npm/dapjs/dist/dap.umd.js"></script>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -118,133 +116,152 @@
 
 <script>
 // ==========================================
-// 1. PROGRAMACIÓN DEL MICRO:BIT VÍA WEBUSB (DAPjs)
+// 1. FLASHEO NATIVO WEBUSB (PROTOCOLO CREATEAI)
 // ==========================================
 const flashBtn = document.getElementById('flashBtn');
 const flashStatus = document.getElementById('flashStatus');
 const flashProgressArea = document.getElementById('flashProgressArea');
 const flashProgressBar = document.getElementById('flashProgressBar');
 
-function cargarScript(url) {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = url;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error(`Fallo al cargar script: ${url}`));
-    document.head.appendChild(s);
-  });
-}
+async function flashearProtocoloCreateAI(device, hexString, onProgress) {
+  await device.open();
+  if (!device.configuration) {
+    await device.selectConfiguration(1);
+  }
 
-// Filtra y prepara el archivo HEX para que DAPLink lo acepte sin errores
-function prepararHexParaMicrobit(hexTexto, serialNumber) {
-  const prefijo = serialNumber ? serialNumber.slice(0, 4) : "";
-  const esV2 = ["9903", "9904", "9905", "9906"].includes(prefijo);
-  const esV1 = ["9900", "9901"].includes(prefijo);
+  // Interfaz CMSIS-DAP (Vendor Class 0xFF o HID 0x03)
+  const iface = device.configuration.interfaces.find(i =>
+    i.alternates.some(a => a.interfaceClass === 0xff || a.interfaceClass === 0x03)
+  ) || device.configuration.interfaces[0];
 
-  // 1. Si es un Universal HEX (múltiples cierres EOF), extraer solo el bloque de la placa conectada
-  if (hexTexto.includes(":00000001FF")) {
-    const bloques = hexTexto.split(":00000001FF");
-    if (bloques.length > 2) {
-      let bloqueElegido = "";
-      for (const b of bloques) {
-        if (!b.trim()) continue;
-        if (esV2 && (b.includes("0400000A9903") || b.includes("0400000A9904") || b.includes("0400000A9905") || b.includes("0400000A9906"))) {
-          bloqueElegido = b;
-          break;
-        }
-        if (esV1 && (b.includes("0400000A9900") || b.includes("0400000A9901"))) {
-          bloqueElegido = b;
-          break;
-        }
-      }
-      if (!bloqueElegido) {
-        bloqueElegido = esV2 ? (bloques[1] || bloques[0]) : bloques[0];
-      }
-      hexTexto = bloqueElegido + ":00000001FF\r\n";
+  const interfaceNumber = iface.interfaceNumber;
+  await device.claimInterface(interfaceNumber);
+
+  const alt = iface.alternates[0];
+  const inEndpoint = alt.endpoints ? alt.endpoints.find(e => e.direction === "in") : null;
+  const outEndpoint = alt.endpoints ? alt.endpoints.find(e => e.direction === "out") : null;
+
+  async function sendDap(cmd, payload) {
+    const packet = new Uint8Array(64);
+    packet[0] = cmd;
+    if (payload) packet.set(payload, 1);
+
+    if (outEndpoint) {
+      await device.transferOut(outEndpoint.endpointNumber, packet);
+    } else {
+      await device.controlTransferOut({
+        requestType: "class",
+        recipient: "interface",
+        request: 9,
+        value: 0x0200,
+        index: interfaceNumber
+      }, packet);
     }
+
+    let res;
+    if (inEndpoint) {
+      res = await device.transferIn(inEndpoint.endpointNumber, 64);
+    } else {
+      res = await device.controlTransferIn({
+        requestType: "class",
+        recipient: "interface",
+        request: 1,
+        value: 0x0100,
+        index: interfaceNumber
+      }, 64);
+    }
+    return new Uint8Array(res.data.buffer);
   }
 
-  // 2. Limpiar registros no estándar (como :0400000A) que provocan el 'Flash error'
-  const lineas = hexTexto.split(/\r?\n/);
-  const lineasValidas = [];
-  for (let linea of lineas) {
-    linea = linea.trim();
-    if (!linea.startsWith(":")) continue;
-    if (linea.startsWith(":0400000A")) continue; // Eliminar cabecera propietaria
-    lineasValidas.push(linea);
-  }
+  // Comandos DAPLink oficiales de CreateAI
+  const CMD_RESET = 137;       // 0x89
+  const CMD_FLASH_OPEN = 138;  // 0x8A
+  const CMD_FLASH_CLOSE = 139; // 0x8B
+  const CMD_FLASH_WRITE = 140; // 0x8C
+  const STATUS_OK = 0;
+  const STATUS_DONE = 18;      // 0x12 -> Fin exitoso en micro:bit V2
+  const CHUNK_SIZE = 62;
 
-  // 3. Garantizar cierre oficial EOF
-  if (!lineasValidas[lineasValidas.length - 1].includes(":00000001FF")) {
-    lineasValidas.push(":00000001FF");
-  }
+  try {
+    // 1. Abrir sesión Flash
+    const openPayload = new Uint8Array(4);
+    new DataView(openPayload.buffer).setUint32(0, 1, true);
+    const openRes = await sendDap(CMD_FLASH_OPEN, openPayload);
+    if (openRes[1] !== STATUS_OK) {
+      throw new Error(`DAPLink Flash Open falló (status: ${openRes[1]})`);
+    }
 
-  // 4. Unir estrictamente con \r\n (CRLF obligatorio para el decodificador C)
-  return lineasValidas.join("\r\n") + "\r\n";
+    // 2. Transferir bloques del archivo HEX
+    const enc = new TextEncoder();
+    const hexBytes = enc.encode(hexString);
+    const total = hexBytes.byteLength;
+    let offset = 0;
+
+    while (offset < total) {
+      const end = Math.min(total, offset + CHUNK_SIZE);
+      const chunk = hexBytes.subarray(offset, end);
+      const writePayload = new Uint8Array(chunk.length + 1);
+      writePayload[0] = chunk.length;
+      writePayload.set(chunk, 1);
+
+      const writeRes = await sendDap(CMD_FLASH_WRITE, writePayload);
+      offset = end;
+
+      if (onProgress) onProgress(offset / total);
+
+      const status = writeRes[1];
+      if (status === STATUS_DONE) {
+        break; // Completado con éxito
+      } else if (status !== STATUS_OK) {
+        throw new Error(`Error en Flash Write (status: ${status})`);
+      }
+    }
+
+    if (onProgress) onProgress(1);
+
+    // 3. Cerrar sesión Flash
+    const closeRes = await sendDap(CMD_FLASH_CLOSE);
+    if (closeRes[1] !== STATUS_OK) {
+      throw new Error(`DAPLink Flash Close falló (status: ${closeRes[1]})`);
+    }
+
+    // 4. Reiniciar micro:bit para ejecutar el nuevo firmware
+    await sendDap(CMD_RESET);
+
+  } finally {
+    try { await device.releaseInterface(interfaceNumber); } catch (_) {}
+    try { await device.close(); } catch (_) {}
+  }
 }
 
 flashBtn.addEventListener('click', async () => {
   let device = null;
-  let target = null;
-
   try {
     flashBtn.disabled = true;
     flashProgressArea.style.display = "flex";
     flashProgressBar.value = 0;
     flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
 
-    // 1. Selector WebUSB (filtro micro:bit 0x0d28)
     device = await navigator.usb.requestDevice({
       filters: [{ vendorId: 0x0d28 }]
     });
 
-    // 2. Comprobar librería DAPjs
-    let DAP = window.DAPjs || window.dapjs;
-    if (!DAP) {
-      flashStatus.textContent = "Cargando motor DAPLink...";
-      try {
-        await cargarScript('https://cdn.jsdelivr.net/npm/dapjs/dist/dap.umd.js');
-      } catch {
-        await cargarScript('https://unpkg.com/dapjs/dist/dap.umd.js');
-      }
-      DAP = window.DAPjs || window.dapjs;
-    }
-
-    if (!DAP || !DAP.WebUSB || !DAP.DAPLink) {
-      throw new Error("No se pudo inicializar la librería DAPjs.");
-    }
-
-    // 3. Descargar el archivo firmware.hex
-    flashStatus.textContent = "Cargando firmware.hex...";
-    const response = await fetch('./microbit-Bluetooth-Control.hex');
+    flashStatus.textContent = "Cargando archivo .hex...";
+    let response = await fetch('./firmware.hex');
     if (!response.ok) {
-      throw new Error("No se encontró './firmware.hex'. Asegúrate de que esté en la misma carpeta.");
+      response = await fetch('./microbit-Bluetooth-Control.hex');
     }
-    const hexDataOriginal = await response.text();
+    if (!response.ok) {
+      throw new Error("No se encontró 'firmware.hex' ni 'microbit-Bluetooth-Control.hex'. Asegúrate de colocar el archivo en la misma carpeta.");
+    }
+    const hexData = await response.text();
 
-    // 4. Sanitizar y adaptar el HEX a la placa detectada
-    flashStatus.textContent = "Adaptando formato para micro:bit...";
-    const hexProcesado = prepararHexParaMicrobit(hexDataOriginal, device.serialNumber);
-
-    // 5. Iniciar flasheo con DAPLink
-    const transport = new DAP.WebUSB(device);
-    target = new DAP.DAPLink(transport);
-
-    target.on('progress', (progress) => {
+    flashStatus.textContent = "Flasheando micro:bit...";
+    await flashearProtocoloCreateAI(device, hexData, (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
       flashStatus.textContent = `Flasheando firmware... ${porcentaje}%`;
     });
-
-    flashStatus.textContent = "Conectando al micro:bit por USB...";
-    await target.connect();
-
-    flashStatus.textContent = "Escribiendo en memoria Flash...";
-    const enc = new TextEncoder();
-    const bufferBinario = enc.encode(hexProcesado);
-
-    // Pasamos el ArrayBuffer depurado
-    await target.flash(bufferBinario.buffer);
 
     flashProgressBar.value = 100;
     flashStatus.textContent = "¡micro:bit programado con éxito!";
@@ -254,12 +271,6 @@ flashBtn.addEventListener('click', async () => {
     flashStatus.textContent = "Error: " + error.message;
     alert("Fallo al programar: " + error.message);
   } finally {
-    if (target) {
-      try { await target.disconnect(); } catch (e) {}
-    }
-    if (device && device.opened) {
-      try { await device.close(); } catch (e) {}
-    }
     flashBtn.disabled = false;
   }
 });
@@ -302,7 +313,7 @@ connectBtn.addEventListener('click', async () => {
 
     try {
       const periodChar = await service.getCharacteristic(ACCEL_PERIOD_CHAR_UUID);
-      await periodChar.writeValue(new Uint16Array([20])); // Intervalo de 20 ms
+      await periodChar.writeValue(new Uint16Array([20])); // 20 ms (50 Hz)
     } catch (e) {
       console.warn("Frecuencia predeterminada mantenida:", e);
     }
@@ -414,7 +425,7 @@ streamBtn.addEventListener('click', () => {
   }
 });
 
-// Renderizado continuo en Canvas
+// Renderizado continuo en Canvas (60 FPS)
 const canvas = document.getElementById('grafica');
 const ctx = canvas.getContext('2d');
 
