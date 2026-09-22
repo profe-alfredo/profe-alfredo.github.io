@@ -167,7 +167,7 @@ flashBtn.addEventListener('click', async () => {
 
     // 3. Descargar el firmware .hex ubicado junto al HTML
     flashStatus.textContent = "Cargando firmware.hex...";
-    const response = await fetch('./firmware.hex');
+    const response = await fetch('./microbit-Bluetooth-Control.hex');
     if (!response.ok) {
       throw new Error("No se encontró './firmware.hex'. Asegúrate de que el archivo esté en la misma carpeta que este HTML.");
     }
