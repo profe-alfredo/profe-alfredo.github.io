@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>micro:bit — Monitor y Grabador de Movimiento</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 24px;
+      background: #18181b;
+      color: #f4f4f5;
+    }
+    .panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    
+    .btn-connect { background: #2563eb; color: #fff; }
+    .btn-stream { background: #3f3f46; color: #fff; }
+    .btn-stream.active { background: #059669; }
+    
+    /* Botón de grabación */
+    .btn-record { background: #f59e0b; color: #18181b; }
+    .btn-record.recording {
+      background: #ef4444;
+      color: #fff;
+      animation: pulse 1s infinite alternate;
+    }
+    
+    @keyframes pulse {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(1.03); opacity: 0.85; }
+    }
+
+    #recordStatus {
+      font-size: 14px;
+      font-weight: 500;
+      color: #a1a1aa;
+    }
+
+    .readings {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 12px;
+      font-family: monospace;
+      font-size: 18px;
+    }
+    .axis-x { color: #f87171; }
+    .axis-y { color: #4ade80; }
+    .axis-z { color: #60a5fa; }
+
+    canvas {
+      background: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>micro:bit — Monitor y Captura de Movimiento</h2>
+
+  <div class="panel">
+    <button class="btn-connect" onclick="conectar()">1. Conectar</button>
+    <button id="streamBtn" class="btn-stream" onclick="toggleStream()" disabled>2. Pausar Gráfica</button>
+    <button id="recordBtn" class="btn-record" onclick="iniciarGrabacion()" disabled>⏺ Grabar Muestra (3s)</button>
+    <span id="recordStatus">Sin conectar</span>
+  </div>
+
+  <div class="readings">
+    <span class="axis-x">X: <span id="valX">0</span> mg</span>
+    <span class="axis-y">Y: <span id="valY">0</span> mg</span>
+    <span class="axis-z">Z: <span id="valZ">0</span> mg</span>
+  </div>
+
+  <canvas id="grafica" width="720" height="280"></canvas>
+
+<script>
+// UUIDs del servicio nativo de acelerómetro
+const ACCEL_SERVICE_UUID = 'e95d0753-251d-470a-a062-fa1922dfa9a8';
+const ACCEL_DATA_CHAR_UUID = 'e95dca4b-251d-470a-a062-fa1922dfa9a8';
+const ACCEL_PERIOD_CHAR_UUID = 'e95dfb24-251d-470a-a062-fa1922dfa9a8';
+
+let dataCharacteristic;
+let streaming = true;
+
+// Variables para la grabación a CSV
+let grabacionActiva = false;
+let bufferMuestras = [];
+let tiempoInicioMs = 0;
+const DURACION_GRABACION_MS = 3000;
+
+// Cola para el gráfico continuo
+const MAX_PUNTOS = 160;
+const puntosX = new Array(MAX_PUNTOS).fill(0);
+const puntosY = new Array(MAX_PUNTOS).fill(0);
+const puntosZ = new Array(MAX_PUNTOS).fill(0);
+
+async function conectar() {
+  try {
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: "BBC micro:bit" }],
+      optionalServices: [ACCEL_SERVICE_UUID]
+    });
+
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(ACCEL_SERVICE_UUID);
+
+    // Ajustamos la frecuencia a 20 ms (50 muestras por segundo)
+    try {
+      const periodChar = await service.getCharacteristic(ACCEL_PERIOD_CHAR_UUID);
+      await periodChar.writeValue(new Uint16Array([20]));
+    } catch (e) {
+      console.warn("Frecuencia predeterminada mantenida:", e);
+    }
+
+    dataCharacteristic = await service.getCharacteristic(ACCEL_DATA_CHAR_UUID);
+    await dataCharacteristic.startNotifications();
+    dataCharacteristic.addEventListener('characteristicvaluechanged', onLecturaAcelerometro);
+
+    document.getElementById('streamBtn').disabled = false;
+    document.getElementById('streamBtn').classList.add('active');
+    document.getElementById('recordBtn').disabled = false;
+    document.getElementById('recordStatus').textContent = "Listo para capturar";
+    alert("¡Conexión BLE lista!");
+  } catch (err) {
+    console.error("Error BLE:", err);
+    alert("Fallo al conectar: " + err.message);
+  }
+}
+
+// Receptor de paquetes BLE binarios (6 bytes: Int16 X, Int16 Y, Int16 Z)
+function onLecturaAcelerometro(event) {
+  const dataView = event.target.value;
+  const x = dataView.getInt16(0, true);
+  const y = dataView.getInt16(2, true);
+  const z = dataView.getInt16(4, true);
+
+  // 1. Si la grabación está activa, guardar en el buffer con timestamp relativo
+  if (grabacionActiva) {
+    const tiempoRelativo = Math.round(performance.now() - tiempoInicioMs);
+    bufferMuestras.push({ t: tiempoRelativo, x, y, z });
+  }
+
+  // 2. Si el stream visual está activo, actualizar la interfaz
+  if (streaming) {
+    document.getElementById('valX').textContent = x;
+    document.getElementById('valY').textContent = y;
+    document.getElementById('valZ').textContent = z;
+
+    puntosX.push(x); puntosX.shift();
+    puntosY.push(y); puntosY.shift();
+    puntosZ.push(z); puntosZ.shift();
+  }
+}
+
+// Control de captura de 3 segundos
+function iniciarGrabacion() {
+  if (grabacionActiva) return;
+
+  grabacionActiva = true;
+  bufferMuestras = [];
+  tiempoInicioMs = performance.now();
+
+  const recordBtn = document.getElementById('recordBtn');
+  const recordStatus = document.getElementById('recordStatus');
+
+  recordBtn.disabled = true;
+  recordBtn.classList.add('recording');
+  recordBtn.textContent = "Grabando...";
+
+  let segundosRestantes = 3;
+  recordStatus.textContent = `Grabando movimiento... (${segundosRestantes}s)`;
+
+  // Contador regresivo visual
+  const intervalId = setInterval(() => {
+    segundosRestantes--;
+    if (segundosRestantes > 0) {
+      recordStatus.textContent = `Grabando movimiento... (${segundosRestantes}s)`;
+    } else {
+      clearInterval(intervalId);
+    }
+  }, 1000);
+
+  // Fin de la ventana de captura a los 3000 ms
+  setTimeout(() => {
+    grabacionActiva = false;
+    recordBtn.disabled = false;
+    recordBtn.classList.remove('recording');
+    recordBtn.textContent = "⏺ Grabar Muestra (3s)";
+    recordStatus.textContent = `Captura terminada (${bufferMuestras.length} muestras). Descargando CSV...`;
+
+    exportarACSV(bufferMuestras);
+  }, DURACION_GRABACION_MS);
+}
+
+// Convertir arreglo de objetos a archivo CSV descargable
+function exportarACSV(muestras) {
+  if (!muestras || muestras.length === 0) {
+    alert("No se capturaron datos durante el intervalo.");
+    return;
+  }
+
+  // Encabezados estándar de series temporales
+  let contenidoCsv = "timestamp_ms,x_mg,y_mg,z_mg\r\n";
+
+  for (const fila of muestras) {
+    contenidoCsv += `${fila.t},${fila.x},${fila.y},${fila.z}\r\n`;
+  }
+
+  // Crear Blob y enlace de descarga automática
+  const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement("a");
+
+  const fechaIso = new Date().toISOString().replace(/[:.]/g, "-");
+  enlace.setAttribute("href", url);
+  enlace.setAttribute("download", `microbit_muestra_${fechaIso}.csv`);
+  document.body.appendChild(enlace);
+
+  enlace.click();
+  document.body.removeChild(enlace);
+  URL.revokeObjectURL(url);
+}
+
+function toggleStream() {
+  streaming = !streaming;
+  const btn = document.getElementById('streamBtn');
+  if (streaming) {
+    btn.textContent = "2. Pausar Gráfica";
+    btn.classList.add('active');
+  } else {
+    btn.textContent = "2. Reanudar Gráfica";
+    btn.classList.remove('active');
+  }
+}
+
+// Motor gráfico en Canvas (60 FPS)
+const canvas = document.getElementById('grafica');
+const ctx = canvas.getContext('2d');
+
+function trazar(datos, color) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  const paso = canvas.width / (MAX_PUNTOS - 1);
+  const centroY = canvas.height / 2;
+  const escala = (canvas.height / 2) / 2048; // Escala a ±2000 mg
+
+  for (let i = 0; i < datos.length; i++) {
+    const px = i * paso;
+    const py = centroY - (datos[i] * escala);
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Eje neutro (0 mg)
+  ctx.strokeStyle = '#27272a';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height / 2);
+  ctx.lineTo(canvas.width, canvas.height / 2);
+  ctx.stroke();
+
+  // Curvas X (rojo), Y (verde), Z (azul)
+  trazar(puntosX, '#f87171');
+  trazar(puntosY, '#4ade80');
+  trazar(puntosZ, '#60a5fa');
+
+  requestAnimationFrame(render);
+}
+
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
