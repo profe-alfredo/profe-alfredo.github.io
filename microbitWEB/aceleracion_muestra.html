@@ -134,24 +134,22 @@ flashBtn.addEventListener('click', async () => {
     flashBtn.disabled = true;
     flashProgressArea.style.display = "flex";
     flashProgressBar.value = 0;
-    flashStatus.textContent = "Cargando archivo firmware.hex...";
-
-    // 1. Descarga el firmware .hex ubicado en el mismo directorio
-    const response = await fetch('./firmware.hex');
-    if (!response.ok) {
-      throw new Error("No se encontró el archivo './firmware.hex'. Asegúrate de que esté en la misma carpeta.");
-    }
-    const hexData = await response.text();
-
     flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
-    
-    // 2. Conectar mediante WebUSB usando la librería oficial
+
+    // 1. Abrir el cuadro de diálogo USB INMEDIATAMENTE al hacer clic
     const connection = new MicrobitWebUSBConnection();
     await connection.connect();
 
-    flashStatus.textContent = "Flasheando micro:bit (0%)...";
+    // 2. Una vez seleccionado y conectado, cargar el archivo .hex
+    flashStatus.textContent = "Descargando firmware.hex...";
+    const response = await fetch('./firmware.hex');
+    if (!response.ok) {
+      throw new Error("No se encontró 'firmware.hex'. Colócalo junto a este archivo HTML.");
+    }
+    const hexData = await response.text();
 
-    // 3. Escribir directamente en la memoria Flash
+    // 3. Flasheo directo a la memoria flash
+    flashStatus.textContent = "Flasheando micro:bit (0%)...";
     await connection.flash(hexData, (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
@@ -163,7 +161,7 @@ flashBtn.addEventListener('click', async () => {
   } catch (error) {
     console.error("Error al flashear por USB:", error);
     flashStatus.textContent = "Error: " + error.message;
-    alert("Fallo al programar: " + error.message);
+    alert("Error: " + error.message);
   } finally {
     flashBtn.disabled = false;
   }
