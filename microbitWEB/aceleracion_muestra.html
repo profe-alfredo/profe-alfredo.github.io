@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>micro:bit — Monitor, Grabador y Flasheador USB</title>
+  <title>micro:bit — Flasheo USB y Captura de Movimiento</title>
+  <!-- Librería estándar de ARM DAPLink para WebUSB -->
+  <script src="https://cdn.jsdelivr.net/npm/dapjs@2.2.3/dist/dap.umd.js"></script>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -28,7 +30,9 @@
     }
     button:disabled { opacity: 0.35; cursor: not-allowed; }
     
-    /* Botones de acción */
+    .btn-flash { background: #8b5cf6; color: #fff; }
+    .btn-flash:hover:not(:disabled) { background: #7c3aed; }
+
     .btn-connect { background: #2563eb; color: #fff; }
     .btn-stream { background: #3f3f46; color: #fff; }
     .btn-stream.active { background: #059669; }
@@ -39,10 +43,6 @@
       color: #fff;
       animation: pulse 1s infinite alternate;
     }
-
-    /* Botón WebUSB Flashear */
-    .btn-flash { background: #8b5cf6; color: #fff; }
-    .btn-flash:hover:not(:disabled) { background: #7c3aed; }
     
     @keyframes pulse {
       from { transform: scale(1); opacity: 1; }
@@ -58,12 +58,12 @@
     .progress-container {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 15px;
     }
 
     progress {
-      width: 200px;
+      width: 220px;
       height: 12px;
       accent-color: #8b5cf6;
     }
@@ -91,12 +91,11 @@
 
   <h2>micro:bit — Flasheo USB, Monitor y Captura de Movimiento</h2>
 
-  <!-- Panel de control -->
   <div class="panel">
-    <!-- Flasheo WebUSB -->
+    <!-- WebUSB -->
     <button id="flashBtn" class="btn-flash">⚡ Programar micro:bit (USB)</button>
 
-    <!-- Conexión Bluetooth -->
+    <!-- Web Bluetooth -->
     <button id="connectBtn" class="btn-connect">1. Conectar Bluetooth</button>
     <button id="streamBtn" class="btn-stream" disabled>2. Pausar Gráfica</button>
     <button id="recordBtn" class="btn-record" disabled>⏺ Grabar Muestra (3s)</button>
@@ -117,48 +116,9 @@
 
   <canvas id="grafica" width="720" height="280"></canvas>
 
-<!-- Script tipo módulo para permitir importación ES6 -->
-<script type="module">
-// Importamos directamente el módulo específico de WebUSB
-import * as webusbModule from "https://esm.sh/@microbit/microbit-connection/webusb";
-
-// Función robusta para instanciar la conexión WebUSB
-function crearConexionWebUSB() {
-  const mod = webusbModule.default || webusbModule;
-
-  // 1. Fábrica oficial createWebUSBConnection
-  if (typeof mod.createWebUSBConnection === 'function') {
-    return mod.createWebUSBConnection();
-  }
-  if (typeof webusbModule.createWebUSBConnection === 'function') {
-    return webusbModule.createWebUSBConnection();
-  }
-
-  // 2. Clase constructora WebUSBConnection
-  const ConnectionClass = mod.WebUSBConnection || webusbModule.WebUSBConnection;
-  if (typeof ConnectionClass === 'function') {
-    try {
-      return new ConnectionClass();
-    } catch {
-      return ConnectionClass();
-    }
-  }
-
-  // 3. Exportación por defecto
-  if (typeof mod === 'function') {
-    try {
-      return new mod();
-    } catch {
-      return mod();
-    }
-  }
-
-  console.error("Exportaciones de /webusb:", Object.keys(webusbModule));
-  throw new Error("No se pudo inicializar el cliente WebUSB desde el módulo.");
-}
-
+<script>
 // ==========================================
-// 1. PROGRAMACIÓN DEL MICRO:BIT VÍA WEBUSB
+// 1. PROGRAMACIÓN DEL MICRO:BIT VÍA WEBUSB (DAPjs)
 // ==========================================
 const flashBtn = document.getElementById('flashBtn');
 const flashStatus = document.getElementById('flashStatus');
@@ -170,29 +130,40 @@ flashBtn.addEventListener('click', async () => {
     flashBtn.disabled = true;
     flashProgressArea.style.display = "flex";
     flashProgressBar.value = 0;
-    flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
+    flashStatus.textContent = "Selecciona tu micro:bit en la ventana...";
 
-    // Abre el selector nativo de Chrome/Edge en el primer tick del clic
-    const connection = crearConexionWebUSB();
-    await connection.connect();
+    // 1. Abrir diálogo del navegador con el Vendor ID oficial de micro:bit (0x0d28)
+    const device = await navigator.usb.requestDevice({
+      filters: [{ vendorId: 0x0d28 }]
+    });
 
-    // Con el micro:bit ya emparejado por USB, descargamos el archivo .hex
+    // 2. Descargar el firmware .hex ubicado junto al HTML
     flashStatus.textContent = "Cargando firmware.hex...";
     const response = await fetch('./firmware.hex');
     if (!response.ok) {
-      throw new Error("No se encontró el archivo './firmware.hex'. Asegúrate de que esté en la misma carpeta que este HTML.");
+      throw new Error("No se encontró './firmware.hex'. Asegúrate de que el archivo esté en la misma carpeta.");
     }
     const hexData = await response.text();
 
-    flashStatus.textContent = "Flasheando micro:bit (0%)...";
+    // 3. Crear el transporte WebUSB y la instancia de control DAPLink
+    const transport = new DAPjs.WebUSB(device);
+    const target = new DAPjs.DAPLink(transport);
 
-    // Escribir a la memoria Flash
-    await connection.flash(hexData, (progress) => {
+    // 4. Escuchar eventos de progreso
+    target.on(DAPjs.DAPLink.EVENT_PROGRESS, (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
       flashStatus.textContent = `Flasheando firmware... ${porcentaje}%`;
     });
 
+    flashStatus.textContent = "Conectando al micro:bit por USB...";
+    await target.connect();
+
+    flashStatus.textContent = "Transfiriendo sectores Flash...";
+    const enc = new TextEncoder();
+    await target.flash(enc.encode(hexData));
+
+    flashProgressBar.value = 100;
     flashStatus.textContent = "¡micro:bit programado con éxito!";
     alert("¡micro:bit programado con éxito por USB!");
   } catch (error) {
@@ -242,7 +213,7 @@ connectBtn.addEventListener('click', async () => {
 
     try {
       const periodChar = await service.getCharacteristic(ACCEL_PERIOD_CHAR_UUID);
-      await periodChar.writeValue(new Uint16Array([20])); // 20 ms
+      await periodChar.writeValue(new Uint16Array([20])); // Intervalo de 20 ms
     } catch (e) {
       console.warn("Frecuencia predeterminada mantenida:", e);
     }
@@ -255,10 +226,10 @@ connectBtn.addEventListener('click', async () => {
     streamBtn.classList.add('active');
     recordBtn.disabled = false;
     recordStatus.textContent = "Listo para capturar";
-    alert("¡Conexión BLE lista!");
+    alert("¡Conexión BLE establecida!");
   } catch (err) {
     console.error("Error BLE:", err);
-    alert("Fallo al conectar: " + err.message);
+    alert("Fallo al conectar BLE: " + err.message);
   }
 });
 
@@ -284,7 +255,6 @@ function onLecturaAcelerometro(event) {
   }
 }
 
-// Grabación de 3 segundos
 recordBtn.addEventListener('click', () => {
   if (grabacionActiva) return;
 
