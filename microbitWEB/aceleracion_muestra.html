@@ -90,10 +90,10 @@
   <h2>micro:bit — Flasheo USB, Monitor y Captura de Movimiento</h2>
 
   <div class="panel">
-    <!-- WebUSB -->
+    <!-- Programación WebUSB -->
     <button id="flashBtn" class="btn-flash">⚡ Programar micro:bit (USB)</button>
 
-    <!-- Web Bluetooth -->
+    <!-- Conexión Bluetooth -->
     <button id="connectBtn" class="btn-connect">1. Conectar Bluetooth</button>
     <button id="streamBtn" class="btn-stream" disabled>2. Pausar Gráfica</button>
     <button id="recordBtn" class="btn-record" disabled>⏺ Grabar Muestra (3s)</button>
@@ -116,14 +116,14 @@
 
 <script>
 // ==========================================================
-// 1. CONTROLADOR WEBUSB NATIVO (ADAPTADO EXACTO DE CREATEAI)
+// 1. CONTROLADOR WEBUSB NATIVO (ADAPTADO DE CREATEAI)
 // ==========================================================
 const flashBtn = document.getElementById('flashBtn');
 const flashStatus = document.getElementById('flashStatus');
 const flashProgressArea = document.getElementById('flashProgressArea');
 const flashProgressBar = document.getElementById('flashProgressBar');
 
-// Clase de transporte WebUSB extraída de CreateAI (Hz)
+// Clase de transporte WebUSB idéntica a Hz de CreateAI (interfaceClass === 255)
 class MicrobitUSBTransport {
   constructor(device) {
     this.device = device;
@@ -139,8 +139,7 @@ class MicrobitUSBTransport {
     await this.device.open();
     await this.device.selectConfiguration(1);
 
-    // FILTRO EXACTO DE CREATEAI: interfaceClass === 255 (Vendor Specific)
-    // Esto evita seleccionar la clase 3 (HID) que Chrome bloquea por seguridad
+    // Filtro seguro: interfaz de vendedor (Class 255)
     const validInterfaces = this.device.configuration.interfaces.filter(
       i => i.alternates[0].interfaceClass === 255
     );
@@ -207,7 +206,6 @@ class MicrobitUSBTransport {
   }
 }
 
-// Envío de paquetes DAPLink con validación de comando
 async function sendDapCommand(transport, cmd, payload) {
   let packet;
   if (payload) {
@@ -227,32 +225,74 @@ async function sendDapCommand(transport, cmd, payload) {
   return res;
 }
 
-// Rutina de flasheo completa de CreateAI (HV)
+// Analizador y extractor de arquitectura Intel HEX / Universal HEX
+function prepararHexParaPlaca(hexTexto, serialNumber) {
+  const prefijo = (serialNumber || "").slice(0, 4);
+  const esV2 = ["9903", "9904", "9905", "9906"].includes(prefijo);
+  const esV1 = ["9900", "9901"].includes(prefijo);
+
+  // 1. Si es Universal HEX (tiene múltiples bloques separados por :00000001FF)
+  const partes = hexTexto.split(":00000001FF");
+  if (partes.length > 2) {
+    for (const bloque of partes) {
+      const bLimpio = bloque.trim();
+      if (!bLimpio) continue;
+
+      const tieneV2 = bLimpio.includes(":0400000A9903") ||
+                      bLimpio.includes(":0400000A9904") ||
+                      bLimpio.includes(":0400000A9905") ||
+                      bLimpio.includes(":0400000A9906");
+
+      const tieneV1 = bLimpio.includes(":0400000A9900") ||
+                      bLimpio.includes(":0400000A9901");
+
+      if (esV2 && tieneV2) return bLimpio + "\r\n:00000001FF\r\n";
+      if (esV1 && tieneV1) return bLimpio + "\r\n:00000001FF\r\n";
+    }
+  }
+
+  // 2. Si es un archivo de arquitectura única, verificar compatibilidad
+  if (esV2 && (hexTexto.includes(":0400000A9900") || hexTexto.includes(":0400000A9901"))) {
+    throw new Error(
+      `Discrepancia de hardware (Target Mismatch): Tu micro:bit es V2.2 (${prefijo}), pero el archivo .hex que tienes cargado fue compilado exclusivamente para micro:bit V1 (9900). Debes descargar el firmware desde MakeCode para V2.`
+    );
+  }
+
+  if (esV1 && (hexTexto.includes(":0400000A9903") || hexTexto.includes(":0400000A9904") || hexTexto.includes(":0400000A9905") || hexTexto.includes(":0400000A9906"))) {
+    throw new Error(
+      `Discrepancia de hardware (Target Mismatch): Tu micro:bit es V1 (${prefijo}), pero el archivo fue compilado para V2.`
+    );
+  }
+
+  return hexTexto.trim() + "\r\n";
+}
+
+// Rutina de flasheo equivalente a HV de CreateAI
 async function ejecutarFlasheoCreateAI(device, hexString, onProgress) {
   const transport = new MicrobitUSBTransport(device);
   await transport.open();
 
-  const CMD_RESET = 137;       // AV
-  const CMD_FLASH_OPEN = 138;  // OV
-  const CMD_FLASH_CLOSE = 139; // NS
-  const CMD_FLASH_WRITE = 140; // NV
+  const CMD_RESET = 137;       // 0x89
+  const CMD_FLASH_OPEN = 138;  // 0x8A
+  const CMD_FLASH_CLOSE = 139; // 0x8B
+  const CMD_FLASH_WRITE = 140; // 0x8C
   const STATUS_OK = 0;
-  const STATUS_DONE = 18;      // FV: Estado de finalización exitosa en DAPLink
-  const CHUNK_SIZE = 62;       // $V: Tamaño de fragmento por paquete
+  const STATUS_DONE = 18;      // 0x12 -> ERROR_HEX_REST / Finalización exitosa
+  const CHUNK_SIZE = 62;
 
   const enc = new TextEncoder();
   const hexBytes = enc.encode(hexString);
   const totalBytes = hexBytes.byteLength;
 
   try {
-    // 1. Abrir sesión de flasheo
+    // 1. Abrir sesión Flash
     const openPayload = new Uint8Array(new Uint32Array([1]).buffer);
     const openRes = await sendDapCommand(transport, CMD_FLASH_OPEN, openPayload);
     if (openRes.getUint8(1) !== STATUS_OK) {
-      throw new Error(`Error en Flash Open (status: ${openRes.getUint8(1)})`);
+      throw new Error(`DAPLink Flash Open falló (status: ${openRes.getUint8(1)})`);
     }
 
-    // 2. Transferencia de fragmentos del archivo Intel HEX
+    // 2. Transferencia de fragmentos del archivo HEX
     let offset = 0;
     while (offset < totalBytes) {
       const nextOffset = Math.min(totalBytes, offset + CHUNK_SIZE);
@@ -268,9 +308,10 @@ async function ejecutarFlasheoCreateAI(device, hexString, onProgress) {
       if (onProgress) onProgress(offset / totalBytes);
 
       const status = writeRes.getUint8(1);
-      // El micro:bit avisa que completó el flasheo cuando devuelve el status 18
       if (status === STATUS_DONE) {
-        break;
+        break; // Flasheo completado con éxito
+      } else if (status === 19) {
+        throw new Error("Target Mismatch (Status 19): La micro:bit rechazó el archivo porque no corresponde a su versión de procesador.");
       } else if (status !== STATUS_OK) {
         throw new Error(`Error en Flash Write (status: ${status})`);
       }
@@ -278,13 +319,13 @@ async function ejecutarFlasheoCreateAI(device, hexString, onProgress) {
 
     if (onProgress) onProgress(1);
 
-    // 3. Cerrar sesión de flasheo
+    // 3. Cerrar sesión Flash
     const closeRes = await sendDapCommand(transport, CMD_FLASH_CLOSE);
-    if (closeRes.getUint8(1) !== STATUS_OK) {
-      throw new Error(`Error en Flash Close (status: ${closeRes.getUint8(1)})`);
+    if (closeRes.getUint8(1) !== STATUS_OK && closeRes.getUint8(1) !== STATUS_DONE) {
+      console.warn("Aviso en Flash Close:", closeRes.getUint8(1));
     }
 
-    // 4. Reinicio por hardware para ejecutar el nuevo programa
+    // 4. Reinicio del microcontrolador
     await sendDapCommand(transport, CMD_RESET);
 
   } finally {
@@ -292,34 +333,37 @@ async function ejecutarFlasheoCreateAI(device, hexString, onProgress) {
   }
 }
 
-// Botón de programación USB
 flashBtn.addEventListener('click', async () => {
   let device = null;
   try {
     flashBtn.disabled = true;
     flashProgressArea.style.display = "flex";
     flashProgressBar.value = 0;
-    flashStatus.textContent = "Selecciona tu micro:bit en la ventana...";
+    flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
 
-    // 1. Selector de dispositivo WebUSB
+    // 1. Selector WebUSB (Vendor ID oficial 0x0d28)
     device = await navigator.usb.requestDevice({
       filters: [{ vendorId: 0x0d28 }]
     });
 
-    // 2. Carga del archivo .hex local
+    // 2. Descargar el archivo .hex local
     flashStatus.textContent = "Cargando archivo .hex...";
-    let response = await fetch('./microbit-Bluetooth-Control.hex');
+    let response = await fetch('./firmware.hex');
     if (!response.ok) {
-      response = await fetch('./firmware.hex');
+      response = await fetch('./microbit-Bluetooth-Control.hex');
     }
     if (!response.ok) {
-      throw new Error("No se encontró 'microbit-Bluetooth-Control.hex' ni 'firmware.hex'. Asegúrate de que el archivo esté en la misma carpeta.");
+      throw new Error("No se encontró 'firmware.hex' ni 'microbit-Bluetooth-Control.hex' en la carpeta.");
     }
-    const hexData = await response.text();
+    const hexCrudo = await response.text();
 
-    // 3. Ejecución directa del flasheo
+    // 3. Validar arquitectura y preparar el archivo para tu placa V2.2 (9906)
+    flashStatus.textContent = "Verificando arquitectura de hardware...";
+    const hexAjustado = prepararHexParaPlaca(hexCrudo, device.serialNumber);
+
+    // 4. Ejecución del flasheo
     flashStatus.textContent = "Flasheando micro:bit...";
-    await ejecutarFlasheoCreateAI(device, hexData, (progress) => {
+    await ejecutarFlasheoCreateAI(device, hexAjustado, (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
       flashStatus.textContent = `Flasheando firmware... ${porcentaje}%`;
@@ -375,7 +419,7 @@ connectBtn.addEventListener('click', async () => {
 
     try {
       const periodChar = await service.getCharacteristic(ACCEL_PERIOD_CHAR_UUID);
-      await periodChar.writeValue(new Uint16Array([20])); // Intervalo de 20 ms (50 Hz)
+      await periodChar.writeValue(new Uint16Array([20])); // 20 ms
     } catch (e) {
       console.warn("Frecuencia predeterminada mantenida:", e);
     }
