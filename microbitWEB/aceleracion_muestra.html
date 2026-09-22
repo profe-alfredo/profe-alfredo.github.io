@@ -115,103 +115,162 @@
   <canvas id="grafica" width="720" height="280"></canvas>
 
 <script>
-// ==========================================
-// 1. FLASHEO NATIVO WEBUSB (PROTOCOLO CREATEAI)
-// ==========================================
+// ==========================================================
+// 1. CONTROLADOR WEBUSB NATIVO (ADAPTADO EXACTO DE CREATEAI)
+// ==========================================================
 const flashBtn = document.getElementById('flashBtn');
 const flashStatus = document.getElementById('flashStatus');
 const flashProgressArea = document.getElementById('flashProgressArea');
 const flashProgressBar = document.getElementById('flashProgressBar');
 
-async function flashearProtocoloCreateAI(device, hexString, onProgress) {
-  await device.open();
-  if (!device.configuration) {
-    await device.selectConfiguration(1);
+// Clase de transporte WebUSB extraída de CreateAI (Hz)
+class MicrobitUSBTransport {
+  constructor(device) {
+    this.device = device;
+    this.interfaceNumber = undefined;
+    this.endpointIn = undefined;
+    this.endpointOut = undefined;
   }
 
-  // Interfaz CMSIS-DAP (Vendor Class 0xFF o HID 0x03)
-  const iface = device.configuration.interfaces.find(i =>
-    i.alternates.some(a => a.interfaceClass === 0xff || a.interfaceClass === 0x03)
-  ) || device.configuration.interfaces[0];
+  get isOpen() { return this.interfaceNumber !== undefined; }
 
-  const interfaceNumber = iface.interfaceNumber;
-  await device.claimInterface(interfaceNumber);
+  async open() {
+    if (this.isOpen) return;
+    await this.device.open();
+    await this.device.selectConfiguration(1);
 
-  const alt = iface.alternates[0];
-  const inEndpoint = alt.endpoints ? alt.endpoints.find(e => e.direction === "in") : null;
-  const outEndpoint = alt.endpoints ? alt.endpoints.find(e => e.direction === "out") : null;
+    // FILTRO EXACTO DE CREATEAI: interfaceClass === 255 (Vendor Specific)
+    // Esto evita seleccionar la clase 3 (HID) que Chrome bloquea por seguridad
+    const validInterfaces = this.device.configuration.interfaces.filter(
+      i => i.alternates[0].interfaceClass === 255
+    );
 
-  async function sendDap(cmd, payload) {
-    const packet = new Uint8Array(64);
-    packet[0] = cmd;
-    if (payload) packet.set(payload, 1);
-
-    if (outEndpoint) {
-      await device.transferOut(outEndpoint.endpointNumber, packet);
-    } else {
-      await device.controlTransferOut({
-        requestType: "class",
-        recipient: "interface",
-        request: 9,
-        value: 0x0200,
-        index: interfaceNumber
-      }, packet);
+    if (!validInterfaces.length) {
+      throw new Error("No se encontró la interfaz WebUSB (Class 255). Actualiza el firmware de la placa.");
     }
 
+    const selected = validInterfaces.find(i => i.alternates[0].endpoints.length > 0) || validInterfaces[0];
+    this.interfaceNumber = selected.interfaceNumber;
+
+    const endpoints = selected.alternates[0].endpoints;
+    this.endpointIn = undefined;
+    this.endpointOut = undefined;
+
+    for (const ep of endpoints) {
+      if (ep.direction === "in" && !this.endpointIn) this.endpointIn = ep;
+      else if (ep.direction === "out" && !this.endpointOut) this.endpointOut = ep;
+    }
+
+    await this.device.claimInterface(this.interfaceNumber);
+  }
+
+  async close() {
+    if (!this.isOpen) return;
+    try { await this.device.releaseInterface(this.interfaceNumber); } catch (_) {}
+    this.interfaceNumber = undefined;
+    this.endpointIn = undefined;
+    this.endpointOut = undefined;
+    try { await this.device.close(); } catch (_) {}
+  }
+
+  async read() {
     let res;
-    if (inEndpoint) {
-      res = await device.transferIn(inEndpoint.endpointNumber, 64);
+    if (this.endpointIn) {
+      res = await this.device.transferIn(this.endpointIn.endpointNumber, 64);
     } else {
-      res = await device.controlTransferIn({
+      res = await this.device.controlTransferIn({
         requestType: "class",
         recipient: "interface",
         request: 1,
-        value: 0x0100,
-        index: interfaceNumber
+        value: 256,
+        index: this.interfaceNumber
       }, 64);
     }
-    return new Uint8Array(res.data.buffer);
+    if (res.status !== "ok" || !res.data) throw new Error("Fallo en lectura USB");
+    return res.data;
   }
 
-  // Comandos DAPLink oficiales de CreateAI
-  const CMD_RESET = 137;       // 0x89
-  const CMD_FLASH_OPEN = 138;  // 0x8A
-  const CMD_FLASH_CLOSE = 139; // 0x8B
-  const CMD_FLASH_WRITE = 140; // 0x8C
+  async write(data) {
+    const packet = new Uint8Array(64);
+    packet.set(data.subarray(0, 64));
+    if (this.endpointOut) {
+      await this.device.transferOut(this.endpointOut.endpointNumber, packet);
+    } else {
+      await this.device.controlTransferOut({
+        requestType: "class",
+        recipient: "interface",
+        request: 9,
+        value: 512,
+        index: this.interfaceNumber
+      }, packet);
+    }
+  }
+}
+
+// Envío de paquetes DAPLink con validación de comando
+async function sendDapCommand(transport, cmd, payload) {
+  let packet;
+  if (payload) {
+    packet = new Uint8Array(payload.length + 1);
+    packet[0] = cmd;
+    packet.set(payload, 1);
+  } else {
+    packet = new Uint8Array([cmd]);
+  }
+
+  await transport.write(packet);
+  const res = await transport.read();
+
+  if (res.getUint8(0) !== cmd) {
+    throw new Error(`Respuesta inválida para comando ${cmd} -> ${res.getUint8(0)}`);
+  }
+  return res;
+}
+
+// Rutina de flasheo completa de CreateAI (HV)
+async function ejecutarFlasheoCreateAI(device, hexString, onProgress) {
+  const transport = new MicrobitUSBTransport(device);
+  await transport.open();
+
+  const CMD_RESET = 137;       // AV
+  const CMD_FLASH_OPEN = 138;  // OV
+  const CMD_FLASH_CLOSE = 139; // NS
+  const CMD_FLASH_WRITE = 140; // NV
   const STATUS_OK = 0;
-  const STATUS_DONE = 18;      // 0x12 -> Fin exitoso en micro:bit V2
-  const CHUNK_SIZE = 62;
+  const STATUS_DONE = 18;      // FV: Estado de finalización exitosa en DAPLink
+  const CHUNK_SIZE = 62;       // $V: Tamaño de fragmento por paquete
+
+  const enc = new TextEncoder();
+  const hexBytes = enc.encode(hexString);
+  const totalBytes = hexBytes.byteLength;
 
   try {
-    // 1. Abrir sesión Flash
-    const openPayload = new Uint8Array(4);
-    new DataView(openPayload.buffer).setUint32(0, 1, true);
-    const openRes = await sendDap(CMD_FLASH_OPEN, openPayload);
-    if (openRes[1] !== STATUS_OK) {
-      throw new Error(`DAPLink Flash Open falló (status: ${openRes[1]})`);
+    // 1. Abrir sesión de flasheo
+    const openPayload = new Uint8Array(new Uint32Array([1]).buffer);
+    const openRes = await sendDapCommand(transport, CMD_FLASH_OPEN, openPayload);
+    if (openRes.getUint8(1) !== STATUS_OK) {
+      throw new Error(`Error en Flash Open (status: ${openRes.getUint8(1)})`);
     }
 
-    // 2. Transferir bloques del archivo HEX
-    const enc = new TextEncoder();
-    const hexBytes = enc.encode(hexString);
-    const total = hexBytes.byteLength;
+    // 2. Transferencia de fragmentos del archivo Intel HEX
     let offset = 0;
+    while (offset < totalBytes) {
+      const nextOffset = Math.min(totalBytes, offset + CHUNK_SIZE);
+      const chunk = hexBytes.slice(offset, nextOffset);
 
-    while (offset < total) {
-      const end = Math.min(total, offset + CHUNK_SIZE);
-      const chunk = hexBytes.subarray(offset, end);
-      const writePayload = new Uint8Array(chunk.length + 1);
-      writePayload[0] = chunk.length;
-      writePayload.set(chunk, 1);
+      const writePayload = new Uint8Array(chunk.byteLength + 1);
+      writePayload[0] = chunk.byteLength;
+      writePayload.set(new Uint8Array(chunk), 1);
 
-      const writeRes = await sendDap(CMD_FLASH_WRITE, writePayload);
-      offset = end;
+      const writeRes = await sendDapCommand(transport, CMD_FLASH_WRITE, writePayload);
+      offset = nextOffset;
 
-      if (onProgress) onProgress(offset / total);
+      if (onProgress) onProgress(offset / totalBytes);
 
-      const status = writeRes[1];
+      const status = writeRes.getUint8(1);
+      // El micro:bit avisa que completó el flasheo cuando devuelve el status 18
       if (status === STATUS_DONE) {
-        break; // Completado con éxito
+        break;
       } else if (status !== STATUS_OK) {
         throw new Error(`Error en Flash Write (status: ${status})`);
       }
@@ -219,45 +278,48 @@ async function flashearProtocoloCreateAI(device, hexString, onProgress) {
 
     if (onProgress) onProgress(1);
 
-    // 3. Cerrar sesión Flash
-    const closeRes = await sendDap(CMD_FLASH_CLOSE);
-    if (closeRes[1] !== STATUS_OK) {
-      throw new Error(`DAPLink Flash Close falló (status: ${closeRes[1]})`);
+    // 3. Cerrar sesión de flasheo
+    const closeRes = await sendDapCommand(transport, CMD_FLASH_CLOSE);
+    if (closeRes.getUint8(1) !== STATUS_OK) {
+      throw new Error(`Error en Flash Close (status: ${closeRes.getUint8(1)})`);
     }
 
-    // 4. Reiniciar micro:bit para ejecutar el nuevo firmware
-    await sendDap(CMD_RESET);
+    // 4. Reinicio por hardware para ejecutar el nuevo programa
+    await sendDapCommand(transport, CMD_RESET);
 
   } finally {
-    try { await device.releaseInterface(interfaceNumber); } catch (_) {}
-    try { await device.close(); } catch (_) {}
+    await transport.close();
   }
 }
 
+// Botón de programación USB
 flashBtn.addEventListener('click', async () => {
   let device = null;
   try {
     flashBtn.disabled = true;
     flashProgressArea.style.display = "flex";
     flashProgressBar.value = 0;
-    flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
+    flashStatus.textContent = "Selecciona tu micro:bit en la ventana...";
 
+    // 1. Selector de dispositivo WebUSB
     device = await navigator.usb.requestDevice({
       filters: [{ vendorId: 0x0d28 }]
     });
 
+    // 2. Carga del archivo .hex local
     flashStatus.textContent = "Cargando archivo .hex...";
-    let response = await fetch('./firmware.hex');
+    let response = await fetch('./microbit-Bluetooth-Control.hex');
     if (!response.ok) {
-      response = await fetch('./microbit-Bluetooth-Control.hex');
+      response = await fetch('./firmware.hex');
     }
     if (!response.ok) {
-      throw new Error("No se encontró 'firmware.hex' ni 'microbit-Bluetooth-Control.hex'. Asegúrate de colocar el archivo en la misma carpeta.");
+      throw new Error("No se encontró 'microbit-Bluetooth-Control.hex' ni 'firmware.hex'. Asegúrate de que el archivo esté en la misma carpeta.");
     }
     const hexData = await response.text();
 
+    // 3. Ejecución directa del flasheo
     flashStatus.textContent = "Flasheando micro:bit...";
-    await flashearProtocoloCreateAI(device, hexData, (progress) => {
+    await ejecutarFlasheoCreateAI(device, hexData, (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
       flashStatus.textContent = `Flasheando firmware... ${porcentaje}%`;
@@ -313,7 +375,7 @@ connectBtn.addEventListener('click', async () => {
 
     try {
       const periodChar = await service.getCharacteristic(ACCEL_PERIOD_CHAR_UUID);
-      await periodChar.writeValue(new Uint16Array([20])); // 20 ms (50 Hz)
+      await periodChar.writeValue(new Uint16Array([20])); // Intervalo de 20 ms (50 Hz)
     } catch (e) {
       console.warn("Frecuencia predeterminada mantenida:", e);
     }
