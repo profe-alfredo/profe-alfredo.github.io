@@ -26,18 +26,8 @@
     button:disabled { opacity: 0.35; cursor: not-allowed; }
     .status { margin-top: 15px; font-size: 14px; color: #a1a1aa; }
     progress { width: 260px; height: 12px; accent-color: #8b5cf6; margin-top: 10px; }
-    
-    /* El iframe debe tener dimensiones reales para que Chrome no congele el motor */
-    #makecodeIframe {
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-      width: 300px;
-      height: 300px;
-      opacity: 0;
-      pointer-events: none;
-      border: 0;
-    }
+    /* Iframe de compilación oculto */
+    #makecodeIframe { display: none; }
   </style>
 </head>
 <body>
@@ -50,7 +40,7 @@
   </div>
   <p id="txtEstado" class="status">Cargando MakeCode en segundo plano...</p>
 
-  <!-- Iframe con el editor oficial -->
+  <!-- Iframe oficial configurado en modo controlador -->
   <iframe id="makecodeIframe" src="https://makecode.microbit.org/?controller=1&readonly=1"></iframe>
 
 <script>
@@ -64,30 +54,22 @@ const progresoContainer = document.getElementById("progresoContainer");
 let editorListo = false;
 let resolverCompilacion = null;
 
-function activarEditorListo() {
-  if (editorListo) return;
-  editorListo = true;
-  btn.disabled = false;
-  btn.textContent = "⚡ Compilar y Programar micro:bit (USB)";
-  txtEstado.textContent = "Motor de compilación listo.";
-  console.log("-> MakeCode está listo para recibir proyectos.");
-}
-
-// 1. Escuchar eventos provenientes del iframe
+// 1. Escuchar eventos del Iframe de MakeCode
 window.addEventListener("message", (event) => {
-  if (!event.origin.includes("makecode.microbit.org")) return;
+  if (event.origin !== MAKECODE_ORIGIN) return;
 
   const data = event.data;
   if (!data || data.type !== "pxteditor") return;
 
-  console.log("[MakeCode Event]", data.action);
-
-  // Señales que confirman que el editor está activo
-  if (data.action === "editorready" || data.action === "workspacesync") {
-    activarEditorListo();
+  // MakeCode terminó de cargar su entorno en memoria
+  if (data.action === "editorready") {
+    editorListo = true;
+    btn.disabled = false;
+    btn.textContent = "⚡ Compilar y Programar micro:bit (USB)";
+    txtEstado.textContent = "Motor de compilación listo.";
   }
 
-  // Respuesta de compilación con el binario
+  // MakeCode devuelve el resultado de la compilación
   if (data.action === "compile") {
     if (resolverCompilacion) {
       resolverCompilacion(data);
@@ -96,21 +78,7 @@ window.addEventListener("message", (event) => {
   }
 });
 
-// 2. Ping de respaldo: si MakeCode cargó antes del script, solicitamos sincronización
-const pingTimer = setInterval(() => {
-  if (editorListo) {
-    clearInterval(pingTimer);
-    return;
-  }
-  if (iframe.contentWindow) {
-    iframe.contentWindow.postMessage({
-      type: "pxteditor",
-      action: "workspacesync"
-    }, MAKECODE_ORIGIN);
-  }
-}, 800);
-
-// 3. Envío del código TypeScript a MakeCode
+// 2. Función para solicitar la compilación al iframe
 function compilarCodigoMakeCode(codigoTypeScript) {
   return new Promise((resolve, reject) => {
     if (!editorListo) {
@@ -121,11 +89,11 @@ function compilarCodigoMakeCode(codigoTypeScript) {
       if (res.success && res.outfiles && res.outfiles["binary.hex"]) {
         resolve(res.outfiles["binary.hex"]);
       } else {
-        console.error("Fallo de compilación MakeCode:", res);
-        reject(new Error("MakeCode no pudo compilar el código."));
+        reject(new Error("MakeCode falló al compilar el código."));
       }
     };
 
+    // Estructura del proyecto con soporte Bluetooth
     const proyecto = {
       files: {
         "main.ts": codigoTypeScript,
@@ -135,11 +103,12 @@ function compilarCodigoMakeCode(codigoTypeScript) {
             "core": "*",
             "bluetooth": "*"
           },
+          description: "Generado dinámicamente",
           yotta: {
             config: {
               "microbit-dal": {
                 "bluetooth": {
-                  "pairing_mode": 0 // No Pairing Required
+                  "pairing_mode": 0 // 0 = No Pairing Required
                 }
               }
             }
@@ -157,7 +126,7 @@ function compilarCodigoMakeCode(codigoTypeScript) {
   });
 }
 
-// 4. Conexión WebUSB y flasheo
+// 3. Flasheo WebUSB utilizando el binario obtenido
 btn.addEventListener("click", async () => {
   let device = null;
   let target = null;
@@ -168,16 +137,18 @@ btn.addEventListener("click", async () => {
     progressBar.value = 0;
     txtEstado.textContent = "Selecciona tu micro:bit en la ventana emergente...";
 
+    // Solicitar permiso WebUSB de inmediato para no perder el gesto del usuario
     device = await navigator.usb.requestDevice({
       filters: [{ vendorId: 0x0d28 }]
     });
 
+    // Código TypeScript a compilar al vuelo
     const scriptTypeScript = `
 bluetooth.startAccelerometerService()
 basic.showIcon(IconNames.Heart)
 `;
 
-    txtEstado.textContent = "Compilando firmware al vuelo para tu hardware...";
+    txtEstado.textContent = "Compilando firmware al vuelo con MakeCode...";
     const hexGenerado = await compilarCodigoMakeCode(scriptTypeScript);
 
     txtEstado.textContent = "Conectando con la placa por USB...";
