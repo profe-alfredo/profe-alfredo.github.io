@@ -101,17 +101,16 @@
   <h2>micro:bit — Flasheo USB, Monitor y Captura de Movimiento</h2>
 
   <div class="panel">
-    <!-- Selector de firmware a flashear -->
+    <!-- Selector de programas para elegir qué archivo descargar/programar -->
     <select id="programSelector" class="select-program">
-      <option value="firmware.hex">Programa 1: Acelerómetro BLE (Transmisor)</option>
+      <option value="firmware.hex">Programa 1: Acelerómetro BLE</option>
       <option value="microbit-Bluetooth-Control.hex">Programa 2: Control Alternativo</option>
-      <!-- Puedes agregar más archivos aquí -->
     </select>
 
-    <!-- Botón de flasheo WebUSB -->
-    <button id="flashBtn" class="btn-flash">⚡ Programar Seleccionado (USB)</button>
+    <!-- Botón de descarga/programación rápida -->
+    <button id="flashBtn" class="btn-flash">⚡ Preparar y Descargar .hex</button>
 
-    <!-- Conexión y Control Bluetooth -->
+    <!-- Conexión Bluetooth -->
     <button id="connectBtn" class="btn-connect">1. Conectar Bluetooth</button>
     <button id="streamBtn" class="btn-stream" disabled>2. Pausar Gráfica</button>
     <button id="recordBtn" class="btn-record" disabled>⏺ Grabar Muestra (3s)</button>
@@ -134,7 +133,7 @@
 
 <script>
 // ==========================================================
-// 1. FLASHEO NATIVO WEBUSB (PROTOCOLO CREATEAI DIRECTO)
+// 1. SISTEMA DE SELECCIÓN Y DESCARGA SEGURA DE PROGRAMAS HEX
 // ==========================================================
 const flashBtn = document.getElementById('flashBtn');
 const flashStatus = document.getElementById('flashStatus');
@@ -142,209 +141,47 @@ const flashProgressArea = document.getElementById('flashProgressArea');
 const flashProgressBar = document.getElementById('flashProgressBar');
 const programSelector = document.getElementById('programSelector');
 
-// Transporte WebUSB nativo filtrando únicamente Vendor Specific (Class 255)
-class MicrobitUSBTransport {
-  constructor(device) {
-    this.device = device;
-    this.interfaceNumber = undefined;
-    this.endpointIn = undefined;
-    this.endpointOut = undefined;
-  }
-
-  get isOpen() { return this.interfaceNumber !== undefined; }
-
-  async open() {
-    if (this.isOpen) return;
-    await this.device.open();
-    await this.device.selectConfiguration(1);
-
-    const validInterfaces = this.device.configuration.interfaces.filter(
-      i => i.alternates[0].interfaceClass === 255
-    );
-
-    if (!validInterfaces.length) {
-      throw new Error("No se encontró la interfaz WebUSB (Class 255).");
-    }
-
-    const selected = validInterfaces.find(i => i.alternates[0].endpoints.length > 0) || validInterfaces[0];
-    this.interfaceNumber = selected.interfaceNumber;
-
-    for (const ep of selected.alternates[0].endpoints) {
-      if (ep.direction === "in" && !this.endpointIn) this.endpointIn = ep;
-      else if (ep.direction === "out" && !this.endpointOut) this.endpointOut = ep;
-    }
-
-    await this.device.claimInterface(this.interfaceNumber);
-  }
-
-  async close() {
-    if (!this.isOpen) return;
-    try { await this.device.releaseInterface(this.interfaceNumber); } catch (_) {}
-    this.interfaceNumber = undefined;
-    this.endpointIn = undefined;
-    this.endpointOut = undefined;
-    try { await this.device.close(); } catch (_) {}
-  }
-
-  async read() {
-    let res;
-    if (this.endpointIn) {
-      res = await this.device.transferIn(this.endpointIn.endpointNumber, 64);
-    } else {
-      res = await this.device.controlTransferIn({
-        requestType: "class",
-        recipient: "interface",
-        request: 1,
-        value: 256,
-        index: this.interfaceNumber
-      }, 64);
-    }
-    if (res.status !== "ok" || !res.data) throw new Error("Fallo en lectura USB");
-    return res.data;
-  }
-
-  async write(data) {
-    const packet = new Uint8Array(64);
-    packet.set(data.subarray(0, 64));
-    if (this.endpointOut) {
-      await this.device.transferOut(this.endpointOut.endpointNumber, packet);
-    } else {
-      await this.device.controlTransferOut({
-        requestType: "class",
-        recipient: "interface",
-        request: 9,
-        value: 512,
-        index: this.interfaceNumber
-      }, packet);
-    }
-  }
-}
-
-async function sendDapCommand(transport, cmd, payload) {
-  let packet;
-  if (payload) {
-    packet = new Uint8Array(payload.length + 1);
-    packet[0] = cmd;
-    packet.set(payload, 1);
-  } else {
-    packet = new Uint8Array([cmd]);
-  }
-
-  await transport.write(packet);
-  const res = await transport.read();
-
-  if (res.getUint8(0) !== cmd) {
-    throw new Error(`Respuesta inválida para comando ${cmd} -> ${res.getUint8(0)}`);
-  }
-  return res;
-}
-
-// Envío directo de bloques HEX al chip DAPLink
-async function flashearHexDirecto(device, hexString, onProgress) {
-  const transport = new MicrobitUSBTransport(device);
-  await transport.open();
-
-  const CMD_RESET = 137;       // 0x89: Reiniciar
-  const CMD_FLASH_OPEN = 138;  // 0x8A: Abrir sesión
-  const CMD_FLASH_CLOSE = 139; // 0x8B: Cerrar sesión
-  const CMD_FLASH_WRITE = 140; // 0x8C: Escribir bloque
-  const STATUS_OK = 0;
-  const STATUS_DONE = 18;      // 0x12: Fin exitoso reportado por el micro:bit
-  const CHUNK_SIZE = 62;
-
-  const enc = new TextEncoder();
-  // Formatear saltos de línea a CRLF requeridos por DAPLink
-  const hexFormateado = hexString.trim().replace(/\r?\n/g, "\r\n") + "\r\n";
-  const hexBytes = enc.encode(hexFormateado);
-  const totalBytes = hexBytes.byteLength;
-
-  try {
-    // 1. Abrir sesión Flash
-    const openPayload = new Uint8Array(new Uint32Array([1]).buffer);
-    const openRes = await sendDapCommand(transport, CMD_FLASH_OPEN, openPayload);
-    if (openRes.getUint8(1) !== STATUS_OK) {
-      throw new Error(`DAPLink Flash Open falló (status: ${openRes.getUint8(1)})`);
-    }
-
-    // 2. Transferencia de fragmentos de 62 bytes
-    let offset = 0;
-    while (offset < totalBytes) {
-      const nextOffset = Math.min(totalBytes, offset + CHUNK_SIZE);
-      const chunk = hexBytes.slice(offset, nextOffset);
-
-      const writePayload = new Uint8Array(chunk.byteLength + 1);
-      writePayload[0] = chunk.byteLength;
-      writePayload.set(new Uint8Array(chunk), 1);
-
-      const writeRes = await sendDapCommand(transport, CMD_FLASH_WRITE, writePayload);
-      offset = nextOffset;
-
-      if (onProgress) onProgress(offset / totalBytes);
-
-      const status = writeRes.getUint8(1);
-      if (status === STATUS_DONE) {
-        break; // Completado con éxito
-      } else if (status !== STATUS_OK) {
-        throw new Error(`Error en Flash Write (status: ${status})`);
-      }
-    }
-
-    if (onProgress) onProgress(1);
-
-    // 3. Cerrar sesión Flash
-    const closeRes = await sendDapCommand(transport, CMD_FLASH_CLOSE);
-    if (closeRes.getUint8(1) !== STATUS_OK && closeRes.getUint8(1) !== STATUS_DONE) {
-      console.warn("Aviso en Flash Close:", closeRes.getUint8(1));
-    }
-
-    // 4. Reiniciar la placa para iniciar el programa
-    await sendDapCommand(transport, CMD_RESET);
-
-  } finally {
-    await transport.close();
-  }
-}
-
-// Botón de programación USB
 flashBtn.addEventListener('click', async () => {
-  let device = null;
   try {
     flashBtn.disabled = true;
     programSelector.disabled = true;
     flashProgressArea.style.display = "flex";
-    flashProgressBar.value = 0;
-    flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
+    flashProgressBar.value = 30;
+    flashStatus.textContent = "Buscando archivo de programa...";
 
-    // 1. Selector WebUSB oficial
-    device = await navigator.usb.requestDevice({
-      filters: [{ vendorId: 0x0d28 }]
-    });
-
-    // 2. Descargar el archivo HEX seleccionado en el menú desplegable (sin caché)
     const archivoSeleccionado = programSelector.value;
-    flashStatus.textContent = `Descargando ${archivoSeleccionado}...`;
-    
+
+    // Descarga segura del archivo .hex seleccionado del servidor local / repositorio
     const response = await fetch(`./${archivoSeleccionado}?_t=${Date.now()}`, { cache: 'no-store' });
     if (!response.ok) {
-      throw new Error(`No se encontró el archivo './${archivoSeleccionado}' en la carpeta.`);
+      throw new Error(`No se encontró el archivo './${archivoSeleccionado}' en la carpeta del proyecto.`);
     }
-    const hexData = await response.text();
+    
+    flashProgressBar.value = 70;
+    flashStatus.textContent = "Preparando descarga...";
+    const blob = await response.blob();
 
-    // 3. Flasheo directo
-    flashStatus.textContent = "Flasheando micro:bit...";
-    await flashearHexDirecto(device, hexData, (progress) => {
-      const porcentaje = Math.round(progress * 100);
-      flashProgressBar.value = porcentaje;
-      flashStatus.textContent = `Flasheando firmware... ${porcentaje}%`;
-    });
+    // Generar enlace temporal de descarga automática
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = archivoSeleccionado;
+    document.body.appendChild(a);
+    a.click();
+    
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 
     flashProgressBar.value = 100;
-    flashStatus.textContent = "¡micro:bit programado con éxito!";
-    alert("¡micro:bit programado con éxito por USB!");
+    flashStatus.textContent = "¡Descarga lista! Arrástralo a la unidad MICROBIT.";
+    
+    alert(`¡Programa "${archivoSeleccionado}" descargado con éxito! Arrástralo a la unidad MICROBIT de tu placa para programarla al instante.`);
+
   } catch (error) {
-    console.error("Error al flashear por USB:", error);
+    console.error("Error al preparar el programa:", error);
     flashStatus.textContent = "Error: " + error.message;
-    alert("Fallo al programar: " + error.message);
+    alert("Fallo al preparar el programa: " + error.message);
   } finally {
     flashBtn.disabled = false;
     programSelector.disabled = false;
