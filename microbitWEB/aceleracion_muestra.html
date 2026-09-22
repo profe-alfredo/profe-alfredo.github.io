@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>micro:bit — Monitor y Grabador de Movimiento</title>
+  <title>micro:bit — Monitor, Grabador y Flasheador USB</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -28,27 +28,44 @@
     }
     button:disabled { opacity: 0.35; cursor: not-allowed; }
     
+    /* Botones de acción */
     .btn-connect { background: #2563eb; color: #fff; }
     .btn-stream { background: #3f3f46; color: #fff; }
     .btn-stream.active { background: #059669; }
     
-    /* Botón de grabación */
     .btn-record { background: #f59e0b; color: #18181b; }
     .btn-record.recording {
       background: #ef4444;
       color: #fff;
       animation: pulse 1s infinite alternate;
     }
+
+    /* Botón WebUSB Flashear */
+    .btn-flash { background: #8b5cf6; color: #fff; }
+    .btn-flash:hover:not(:disabled) { background: #7c3aed; }
     
     @keyframes pulse {
       from { transform: scale(1); opacity: 1; }
       to { transform: scale(1.03); opacity: 0.85; }
     }
 
-    #recordStatus {
+    .status-text {
       font-size: 14px;
       font-weight: 500;
       color: #a1a1aa;
+    }
+
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    progress {
+      width: 200px;
+      height: 12px;
+      accent-color: #8b5cf6;
     }
 
     .readings {
@@ -72,13 +89,24 @@
 </head>
 <body>
 
-  <h2>micro:bit — Monitor y Captura de Movimiento</h2>
+  <h2>micro:bit — Flasheo USB, Monitor y Captura de Movimiento</h2>
 
+  <!-- Panel de control -->
   <div class="panel">
-    <button class="btn-connect" onclick="conectar()">1. Conectar</button>
-    <button id="streamBtn" class="btn-stream" onclick="toggleStream()" disabled>2. Pausar Gráfica</button>
-    <button id="recordBtn" class="btn-record" onclick="iniciarGrabacion()" disabled>⏺ Grabar Muestra (3s)</button>
-    <span id="recordStatus">Sin conectar</span>
+    <!-- Flasheo WebUSB -->
+    <button id="flashBtn" class="btn-flash">⚡ Programar micro:bit (USB)</button>
+
+    <!-- Conexión Bluetooth -->
+    <button id="connectBtn" class="btn-connect">1. Conectar Bluetooth</button>
+    <button id="streamBtn" class="btn-stream" disabled>2. Pausar Gráfica</button>
+    <button id="recordBtn" class="btn-record" disabled>⏺ Grabar Muestra (3s)</button>
+    
+    <span id="recordStatus" class="status-text">Sin conectar</span>
+  </div>
+
+  <div id="flashProgressArea" class="progress-container" style="display: none;">
+    <progress id="flashProgressBar" value="0" max="100"></progress>
+    <span id="flashStatus" class="status-text">Listo</span>
   </div>
 
   <div class="readings">
@@ -89,8 +117,62 @@
 
   <canvas id="grafica" width="720" height="280"></canvas>
 
-<script>
-// UUIDs del servicio nativo de acelerómetro
+<!-- Script tipo módulo para permitir importación ES6 -->
+<script type="module">
+import { MicrobitWebUSBConnection } from "https://esm.sh/@microbit/microbit-connection";
+
+// ==========================================
+// 1. PROGRAMACIÓN DEL MICRO:BIT VÍA WEBUSB
+// ==========================================
+const flashBtn = document.getElementById('flashBtn');
+const flashStatus = document.getElementById('flashStatus');
+const flashProgressArea = document.getElementById('flashProgressArea');
+const flashProgressBar = document.getElementById('flashProgressBar');
+
+flashBtn.addEventListener('click', async () => {
+  try {
+    flashBtn.disabled = true;
+    flashProgressArea.style.display = "flex";
+    flashProgressBar.value = 0;
+    flashStatus.textContent = "Cargando archivo firmware.hex...";
+
+    // 1. Descarga el firmware .hex ubicado en el mismo directorio
+    const response = await fetch('./firmware.hex');
+    if (!response.ok) {
+      throw new Error("No se encontró el archivo './firmware.hex'. Asegúrate de que esté en la misma carpeta.");
+    }
+    const hexData = await response.text();
+
+    flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
+    
+    // 2. Conectar mediante WebUSB usando la librería oficial
+    const connection = new MicrobitWebUSBConnection();
+    await connection.connect();
+
+    flashStatus.textContent = "Flasheando micro:bit (0%)...";
+
+    // 3. Escribir directamente en la memoria Flash
+    await connection.flash(hexData, (progress) => {
+      const porcentaje = Math.round(progress * 100);
+      flashProgressBar.value = porcentaje;
+      flashStatus.textContent = `Flasheando firmware... ${porcentaje}%`;
+    });
+
+    flashStatus.textContent = "¡micro:bit programado con éxito!";
+    alert("¡micro:bit programado con éxito por USB!");
+  } catch (error) {
+    console.error("Error al flashear por USB:", error);
+    flashStatus.textContent = "Error: " + error.message;
+    alert("Fallo al programar: " + error.message);
+  } finally {
+    flashBtn.disabled = false;
+  }
+});
+
+
+// ==========================================
+// 2. COMUNICACIÓN BLE (ACELERÓMETRO NATIVO)
+// ==========================================
 const ACCEL_SERVICE_UUID = 'e95d0753-251d-470a-a062-fa1922dfa9a8';
 const ACCEL_DATA_CHAR_UUID = 'e95dca4b-251d-470a-a062-fa1922dfa9a8';
 const ACCEL_PERIOD_CHAR_UUID = 'e95dfb24-251d-470a-a062-fa1922dfa9a8';
@@ -98,19 +180,22 @@ const ACCEL_PERIOD_CHAR_UUID = 'e95dfb24-251d-470a-a062-fa1922dfa9a8';
 let dataCharacteristic;
 let streaming = true;
 
-// Variables para la grabación a CSV
 let grabacionActiva = false;
 let bufferMuestras = [];
 let tiempoInicioMs = 0;
 const DURACION_GRABACION_MS = 3000;
 
-// Cola para el gráfico continuo
 const MAX_PUNTOS = 160;
 const puntosX = new Array(MAX_PUNTOS).fill(0);
 const puntosY = new Array(MAX_PUNTOS).fill(0);
 const puntosZ = new Array(MAX_PUNTOS).fill(0);
 
-async function conectar() {
+const connectBtn = document.getElementById('connectBtn');
+const streamBtn = document.getElementById('streamBtn');
+const recordBtn = document.getElementById('recordBtn');
+const recordStatus = document.getElementById('recordStatus');
+
+connectBtn.addEventListener('click', async () => {
   try {
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ namePrefix: "BBC micro:bit" }],
@@ -120,10 +205,9 @@ async function conectar() {
     const server = await device.gatt.connect();
     const service = await server.getPrimaryService(ACCEL_SERVICE_UUID);
 
-    // Ajustamos la frecuencia a 20 ms (50 muestras por segundo)
     try {
       const periodChar = await service.getCharacteristic(ACCEL_PERIOD_CHAR_UUID);
-      await periodChar.writeValue(new Uint16Array([20]));
+      await periodChar.writeValue(new Uint16Array([20])); // 20 ms
     } catch (e) {
       console.warn("Frecuencia predeterminada mantenida:", e);
     }
@@ -132,31 +216,28 @@ async function conectar() {
     await dataCharacteristic.startNotifications();
     dataCharacteristic.addEventListener('characteristicvaluechanged', onLecturaAcelerometro);
 
-    document.getElementById('streamBtn').disabled = false;
-    document.getElementById('streamBtn').classList.add('active');
-    document.getElementById('recordBtn').disabled = false;
-    document.getElementById('recordStatus').textContent = "Listo para capturar";
+    streamBtn.disabled = false;
+    streamBtn.classList.add('active');
+    recordBtn.disabled = false;
+    recordStatus.textContent = "Listo para capturar";
     alert("¡Conexión BLE lista!");
   } catch (err) {
     console.error("Error BLE:", err);
     alert("Fallo al conectar: " + err.message);
   }
-}
+});
 
-// Receptor de paquetes BLE binarios (6 bytes: Int16 X, Int16 Y, Int16 Z)
 function onLecturaAcelerometro(event) {
   const dataView = event.target.value;
   const x = dataView.getInt16(0, true);
   const y = dataView.getInt16(2, true);
   const z = dataView.getInt16(4, true);
 
-  // 1. Si la grabación está activa, guardar en el buffer con timestamp relativo
   if (grabacionActiva) {
     const tiempoRelativo = Math.round(performance.now() - tiempoInicioMs);
     bufferMuestras.push({ t: tiempoRelativo, x, y, z });
   }
 
-  // 2. Si el stream visual está activo, actualizar la interfaz
   if (streaming) {
     document.getElementById('valX').textContent = x;
     document.getElementById('valY').textContent = y;
@@ -168,16 +249,13 @@ function onLecturaAcelerometro(event) {
   }
 }
 
-// Control de captura de 3 segundos
-function iniciarGrabacion() {
+// Grabación de 3 segundos
+recordBtn.addEventListener('click', () => {
   if (grabacionActiva) return;
 
   grabacionActiva = true;
   bufferMuestras = [];
   tiempoInicioMs = performance.now();
-
-  const recordBtn = document.getElementById('recordBtn');
-  const recordStatus = document.getElementById('recordStatus');
 
   recordBtn.disabled = true;
   recordBtn.classList.add('recording');
@@ -186,7 +264,6 @@ function iniciarGrabacion() {
   let segundosRestantes = 3;
   recordStatus.textContent = `Grabando movimiento... (${segundosRestantes}s)`;
 
-  // Contador regresivo visual
   const intervalId = setInterval(() => {
     segundosRestantes--;
     if (segundosRestantes > 0) {
@@ -196,7 +273,6 @@ function iniciarGrabacion() {
     }
   }, 1000);
 
-  // Fin de la ventana de captura a los 3000 ms
   setTimeout(() => {
     grabacionActiva = false;
     recordBtn.disabled = false;
@@ -206,23 +282,19 @@ function iniciarGrabacion() {
 
     exportarACSV(bufferMuestras);
   }, DURACION_GRABACION_MS);
-}
+});
 
-// Convertir arreglo de objetos a archivo CSV descargable
 function exportarACSV(muestras) {
   if (!muestras || muestras.length === 0) {
     alert("No se capturaron datos durante el intervalo.");
     return;
   }
 
-  // Encabezados estándar de series temporales
   let contenidoCsv = "timestamp_ms,x_mg,y_mg,z_mg\r\n";
-
   for (const fila of muestras) {
     contenidoCsv += `${fila.t},${fila.x},${fila.y},${fila.z}\r\n`;
   }
 
-  // Crear Blob y enlace de descarga automática
   const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const enlace = document.createElement("a");
@@ -237,19 +309,18 @@ function exportarACSV(muestras) {
   URL.revokeObjectURL(url);
 }
 
-function toggleStream() {
+streamBtn.addEventListener('click', () => {
   streaming = !streaming;
-  const btn = document.getElementById('streamBtn');
   if (streaming) {
-    btn.textContent = "2. Pausar Gráfica";
-    btn.classList.add('active');
+    streamBtn.textContent = "2. Pausar Gráfica";
+    streamBtn.classList.add('active');
   } else {
-    btn.textContent = "2. Reanudar Gráfica";
-    btn.classList.remove('active');
+    streamBtn.textContent = "2. Reanudar Gráfica";
+    streamBtn.classList.remove('active');
   }
-}
+});
 
-// Motor gráfico en Canvas (60 FPS)
+// Renderizado continuo en Canvas
 const canvas = document.getElementById('grafica');
 const ctx = canvas.getContext('2d');
 
@@ -260,7 +331,7 @@ function trazar(datos, color) {
 
   const paso = canvas.width / (MAX_PUNTOS - 1);
   const centroY = canvas.height / 2;
-  const escala = (canvas.height / 2) / 2048; // Escala a ±2000 mg
+  const escala = (canvas.height / 2) / 2048;
 
   for (let i = 0; i < datos.length; i++) {
     const px = i * paso;
@@ -274,7 +345,6 @@ function trazar(datos, color) {
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Eje neutro (0 mg)
   ctx.strokeStyle = '#27272a';
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -282,7 +352,6 @@ function render() {
   ctx.lineTo(canvas.width, canvas.height / 2);
   ctx.stroke();
 
-  // Curvas X (rojo), Y (verde), Z (azul)
   trazar(puntosX, '#f87171');
   trazar(puntosY, '#4ade80');
   trazar(puntosZ, '#60a5fa');
