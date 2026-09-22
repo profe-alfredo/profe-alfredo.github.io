@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>micro:bit — Compilador Dinámico MakeCode</title>
-  <!-- Driver WebUSB DAPjs -->
+  <title>micro:bit — Flasheo USB y Captura de Movimiento</title>
+  <!-- Librería DAPjs oficial sin versión inexistente -->
   <script src="https://cdn.jsdelivr.net/npm/dapjs/dist/dap.umd.js"></script>
   <style>
     body {
@@ -12,6 +12,13 @@
       background: #18181b;
       color: #f4f4f5;
     }
+    .panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
     button {
       padding: 10px 18px;
       font-size: 14px;
@@ -19,161 +26,233 @@
       cursor: pointer;
       border: none;
       border-radius: 6px;
-      background: #8b5cf6;
-      color: #fff;
-      transition: opacity 0.2s;
+      transition: all 0.2s ease;
     }
     button:disabled { opacity: 0.35; cursor: not-allowed; }
-    .status { margin-top: 15px; font-size: 14px; color: #a1a1aa; }
-    progress { width: 260px; height: 12px; accent-color: #8b5cf6; margin-top: 10px; }
-    /* Iframe de compilación oculto */
-    #makecodeIframe { display: none; }
+    
+    .btn-flash { background: #8b5cf6; color: #fff; }
+    .btn-flash:hover:not(:disabled) { background: #7c3aed; }
+
+    .btn-connect { background: #2563eb; color: #fff; }
+    .btn-stream { background: #3f3f46; color: #fff; }
+    .btn-stream.active { background: #059669; }
+    
+    .btn-record { background: #f59e0b; color: #18181b; }
+    .btn-record.recording {
+      background: #ef4444;
+      color: #fff;
+      animation: pulse 1s infinite alternate;
+    }
+    
+    @keyframes pulse {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(1.03); opacity: 0.85; }
+    }
+
+    .status-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #a1a1aa;
+    }
+
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    progress {
+      width: 220px;
+      height: 12px;
+      accent-color: #8b5cf6;
+    }
+
+    .readings {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 12px;
+      font-family: monospace;
+      font-size: 18px;
+    }
+    .axis-x { color: #f87171; }
+    .axis-y { color: #4ade80; }
+    .axis-z { color: #60a5fa; }
+
+    canvas {
+      background: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      display: block;
+    }
   </style>
 </head>
 <body>
 
-  <h2>Compilador y Flasheador Dinámico micro:bit</h2>
-  
-  <button id="btnCompilarFlashear" disabled>1. Esperando motor MakeCode...</button>
-  <div id="progresoContainer" style="display:none;">
-    <progress id="progressBar" value="0" max="100"></progress>
-  </div>
-  <p id="txtEstado" class="status">Cargando MakeCode en segundo plano...</p>
+  <h2>micro:bit — Flasheo USB, Monitor y Captura de Movimiento</h2>
 
-  <!-- Iframe oficial configurado en modo controlador -->
-  <iframe id="makecodeIframe" src="https://makecode.microbit.org/?controller=1&readonly=1"></iframe>
+  <div class="panel">
+    <!-- WebUSB -->
+    <button id="flashBtn" class="btn-flash">⚡ Programar micro:bit (USB)</button>
+
+    <!-- Web Bluetooth -->
+    <button id="connectBtn" class="btn-connect">1. Conectar Bluetooth</button>
+    <button id="streamBtn" class="btn-stream" disabled>2. Pausar Gráfica</button>
+    <button id="recordBtn" class="btn-record" disabled>⏺ Grabar Muestra (3s)</button>
+    
+    <span id="recordStatus" class="status-text">Sin conectar</span>
+  </div>
+
+  <div id="flashProgressArea" class="progress-container" style="display: none;">
+    <progress id="flashProgressBar" value="0" max="100"></progress>
+    <span id="flashStatus" class="status-text">Listo</span>
+  </div>
+
+  <div class="readings">
+    <span class="axis-x">X: <span id="valX">0</span> mg</span>
+    <span class="axis-y">Y: <span id="valY">0</span> mg</span>
+    <span class="axis-z">Z: <span id="valZ">0</span> mg</span>
+  </div>
+
+  <canvas id="grafica" width="720" height="280"></canvas>
 
 <script>
-const MAKECODE_ORIGIN = "https://makecode.microbit.org";
-const iframe = document.getElementById("makecodeIframe");
-const btn = document.getElementById("btnCompilarFlashear");
-const txtEstado = document.getElementById("txtEstado");
-const progressBar = document.getElementById("progressBar");
-const progresoContainer = document.getElementById("progresoContainer");
+// ==========================================
+// 1. PROGRAMACIÓN DEL MICRO:BIT VÍA WEBUSB (DAPjs)
+// ==========================================
+const flashBtn = document.getElementById('flashBtn');
+const flashStatus = document.getElementById('flashStatus');
+const flashProgressArea = document.getElementById('flashProgressArea');
+const flashProgressBar = document.getElementById('flashProgressBar');
 
-let editorListo = false;
-let resolverCompilacion = null;
-
-// 1. Escuchar eventos del Iframe de MakeCode
-window.addEventListener("message", (event) => {
-  if (event.origin !== MAKECODE_ORIGIN) return;
-
-  const data = event.data;
-  if (!data || data.type !== "pxteditor") return;
-
-  // MakeCode terminó de cargar su entorno en memoria
-  if (data.action === "editorready") {
-    editorListo = true;
-    btn.disabled = false;
-    btn.textContent = "⚡ Compilar y Programar micro:bit (USB)";
-    txtEstado.textContent = "Motor de compilación listo.";
-  }
-
-  // MakeCode devuelve el resultado de la compilación
-  if (data.action === "compile") {
-    if (resolverCompilacion) {
-      resolverCompilacion(data);
-      resolverCompilacion = null;
-    }
-  }
-});
-
-// 2. Función para solicitar la compilación al iframe
-function compilarCodigoMakeCode(codigoTypeScript) {
+function cargarScript(url) {
   return new Promise((resolve, reject) => {
-    if (!editorListo) {
-      return reject(new Error("El editor MakeCode aún no ha terminado de cargar."));
-    }
-
-    resolverCompilacion = (res) => {
-      if (res.success && res.outfiles && res.outfiles["binary.hex"]) {
-        resolve(res.outfiles["binary.hex"]);
-      } else {
-        reject(new Error("MakeCode falló al compilar el código."));
-      }
-    };
-
-    // Estructura del proyecto con soporte Bluetooth
-    const proyecto = {
-      files: {
-        "main.ts": codigoTypeScript,
-        "pxt.json": JSON.stringify({
-          name: "microbit-sensor-stream",
-          dependencies: {
-            "core": "*",
-            "bluetooth": "*"
-          },
-          description: "Generado dinámicamente",
-          yotta: {
-            config: {
-              "microbit-dal": {
-                "bluetooth": {
-                  "pairing_mode": 0 // 0 = No Pairing Required
-                }
-              }
-            }
-          }
-        })
-      }
-    };
-
-    iframe.contentWindow.postMessage({
-      type: "pxteditor",
-      action: "compile",
-      project: proyecto,
-      response: true
-    }, MAKECODE_ORIGIN);
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error(`Fallo al cargar script: ${url}`));
+    document.head.appendChild(s);
   });
 }
 
-// 3. Flasheo WebUSB utilizando el binario obtenido
-btn.addEventListener("click", async () => {
+// Filtra y prepara el archivo HEX para que DAPLink lo acepte sin errores
+function prepararHexParaMicrobit(hexTexto, serialNumber) {
+  const prefijo = serialNumber ? serialNumber.slice(0, 4) : "";
+  const esV2 = ["9903", "9904", "9905", "9906"].includes(prefijo);
+  const esV1 = ["9900", "9901"].includes(prefijo);
+
+  // 1. Si es un Universal HEX (múltiples cierres EOF), extraer solo el bloque de la placa conectada
+  if (hexTexto.includes(":00000001FF")) {
+    const bloques = hexTexto.split(":00000001FF");
+    if (bloques.length > 2) {
+      let bloqueElegido = "";
+      for (const b of bloques) {
+        if (!b.trim()) continue;
+        if (esV2 && (b.includes("0400000A9903") || b.includes("0400000A9904") || b.includes("0400000A9905") || b.includes("0400000A9906"))) {
+          bloqueElegido = b;
+          break;
+        }
+        if (esV1 && (b.includes("0400000A9900") || b.includes("0400000A9901"))) {
+          bloqueElegido = b;
+          break;
+        }
+      }
+      if (!bloqueElegido) {
+        bloqueElegido = esV2 ? (bloques[1] || bloques[0]) : bloques[0];
+      }
+      hexTexto = bloqueElegido + ":00000001FF\r\n";
+    }
+  }
+
+  // 2. Limpiar registros no estándar (como :0400000A) que provocan el 'Flash error'
+  const lineas = hexTexto.split(/\r?\n/);
+  const lineasValidas = [];
+  for (let linea of lineas) {
+    linea = linea.trim();
+    if (!linea.startsWith(":")) continue;
+    if (linea.startsWith(":0400000A")) continue; // Eliminar cabecera propietaria
+    lineasValidas.push(linea);
+  }
+
+  // 3. Garantizar cierre oficial EOF
+  if (!lineasValidas[lineasValidas.length - 1].includes(":00000001FF")) {
+    lineasValidas.push(":00000001FF");
+  }
+
+  // 4. Unir estrictamente con \r\n (CRLF obligatorio para el decodificador C)
+  return lineasValidas.join("\r\n") + "\r\n";
+}
+
+flashBtn.addEventListener('click', async () => {
   let device = null;
   let target = null;
 
   try {
-    btn.disabled = true;
-    progresoContainer.style.display = "block";
-    progressBar.value = 0;
-    txtEstado.textContent = "Selecciona tu micro:bit en la ventana emergente...";
+    flashBtn.disabled = true;
+    flashProgressArea.style.display = "flex";
+    flashProgressBar.value = 0;
+    flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
 
-    // Solicitar permiso WebUSB de inmediato para no perder el gesto del usuario
+    // 1. Selector WebUSB (filtro micro:bit 0x0d28)
     device = await navigator.usb.requestDevice({
       filters: [{ vendorId: 0x0d28 }]
     });
 
-    // Código TypeScript a compilar al vuelo
-    const scriptTypeScript = `
-bluetooth.startAccelerometerService()
-basic.showIcon(IconNames.Heart)
-`;
+    // 2. Comprobar librería DAPjs
+    let DAP = window.DAPjs || window.dapjs;
+    if (!DAP) {
+      flashStatus.textContent = "Cargando motor DAPLink...";
+      try {
+        await cargarScript('https://cdn.jsdelivr.net/npm/dapjs/dist/dap.umd.js');
+      } catch {
+        await cargarScript('https://unpkg.com/dapjs/dist/dap.umd.js');
+      }
+      DAP = window.DAPjs || window.dapjs;
+    }
 
-    txtEstado.textContent = "Compilando firmware al vuelo con MakeCode...";
-    const hexGenerado = await compilarCodigoMakeCode(scriptTypeScript);
+    if (!DAP || !DAP.WebUSB || !DAP.DAPLink) {
+      throw new Error("No se pudo inicializar la librería DAPjs.");
+    }
 
-    txtEstado.textContent = "Conectando con la placa por USB...";
-    const DAP = window.DAPjs || window.dapjs;
+    // 3. Descargar el archivo firmware.hex
+    flashStatus.textContent = "Cargando firmware.hex...";
+    const response = await fetch('./microbit-Bluetooth-Control.hex');
+    if (!response.ok) {
+      throw new Error("No se encontró './firmware.hex'. Asegúrate de que esté en la misma carpeta.");
+    }
+    const hexDataOriginal = await response.text();
+
+    // 4. Sanitizar y adaptar el HEX a la placa detectada
+    flashStatus.textContent = "Adaptando formato para micro:bit...";
+    const hexProcesado = prepararHexParaMicrobit(hexDataOriginal, device.serialNumber);
+
+    // 5. Iniciar flasheo con DAPLink
     const transport = new DAP.WebUSB(device);
     target = new DAP.DAPLink(transport);
 
-    target.on("progress", (p) => {
-      const porcentaje = Math.round(p * 100);
-      progressBar.value = porcentaje;
-      txtEstado.textContent = `Flasheando micro:bit... ${porcentaje}%`;
+    target.on('progress', (progress) => {
+      const porcentaje = Math.round(progress * 100);
+      flashProgressBar.value = porcentaje;
+      flashStatus.textContent = `Flasheando firmware... ${porcentaje}%`;
     });
 
+    flashStatus.textContent = "Conectando al micro:bit por USB...";
     await target.connect();
-    txtEstado.textContent = "Escribiendo memoria Flash...";
-    const enc = new TextEncoder();
-    await target.flash(enc.encode(hexGenerado));
 
-    progressBar.value = 100;
-    txtEstado.textContent = "¡micro:bit programado con éxito!";
-    alert("¡micro:bit programado con éxito!");
-  } catch (err) {
-    console.error(err);
-    txtEstado.textContent = "Error: " + err.message;
-    alert("Error durante la operación: " + err.message);
+    flashStatus.textContent = "Escribiendo en memoria Flash...";
+    const enc = new TextEncoder();
+    const bufferBinario = enc.encode(hexProcesado);
+
+    // Pasamos el ArrayBuffer depurado
+    await target.flash(bufferBinario.buffer);
+
+    flashProgressBar.value = 100;
+    flashStatus.textContent = "¡micro:bit programado con éxito!";
+    alert("¡micro:bit programado con éxito por USB!");
+  } catch (error) {
+    console.error("Error al flashear por USB:", error);
+    flashStatus.textContent = "Error: " + error.message;
+    alert("Fallo al programar: " + error.message);
   } finally {
     if (target) {
       try { await target.disconnect(); } catch (e) {}
@@ -181,9 +260,200 @@ basic.showIcon(IconNames.Heart)
     if (device && device.opened) {
       try { await device.close(); } catch (e) {}
     }
-    btn.disabled = false;
+    flashBtn.disabled = false;
   }
 });
+
+
+// ==========================================
+// 2. COMUNICACIÓN BLE (ACELERÓMETRO NATIVO)
+// ==========================================
+const ACCEL_SERVICE_UUID = 'e95d0753-251d-470a-a062-fa1922dfa9a8';
+const ACCEL_DATA_CHAR_UUID = 'e95dca4b-251d-470a-a062-fa1922dfa9a8';
+const ACCEL_PERIOD_CHAR_UUID = 'e95dfb24-251d-470a-a062-fa1922dfa9a8';
+
+let dataCharacteristic;
+let streaming = true;
+
+let grabacionActiva = false;
+let bufferMuestras = [];
+let tiempoInicioMs = 0;
+const DURACION_GRABACION_MS = 3000;
+
+const MAX_PUNTOS = 160;
+const puntosX = new Array(MAX_PUNTOS).fill(0);
+const puntosY = new Array(MAX_PUNTOS).fill(0);
+const puntosZ = new Array(MAX_PUNTOS).fill(0);
+
+const connectBtn = document.getElementById('connectBtn');
+const streamBtn = document.getElementById('streamBtn');
+const recordBtn = document.getElementById('recordBtn');
+const recordStatus = document.getElementById('recordStatus');
+
+connectBtn.addEventListener('click', async () => {
+  try {
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: "BBC micro:bit" }],
+      optionalServices: [ACCEL_SERVICE_UUID]
+    });
+
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(ACCEL_SERVICE_UUID);
+
+    try {
+      const periodChar = await service.getCharacteristic(ACCEL_PERIOD_CHAR_UUID);
+      await periodChar.writeValue(new Uint16Array([20])); // Intervalo de 20 ms
+    } catch (e) {
+      console.warn("Frecuencia predeterminada mantenida:", e);
+    }
+
+    dataCharacteristic = await service.getCharacteristic(ACCEL_DATA_CHAR_UUID);
+    await dataCharacteristic.startNotifications();
+    dataCharacteristic.addEventListener('characteristicvaluechanged', onLecturaAcelerometro);
+
+    streamBtn.disabled = false;
+    streamBtn.classList.add('active');
+    recordBtn.disabled = false;
+    recordStatus.textContent = "Listo para capturar";
+    alert("¡Conexión BLE establecida!");
+  } catch (err) {
+    console.error("Error BLE:", err);
+    alert("Fallo al conectar BLE: " + err.message);
+  }
+});
+
+function onLecturaAcelerometro(event) {
+  const dataView = event.target.value;
+  const x = dataView.getInt16(0, true);
+  const y = dataView.getInt16(2, true);
+  const z = dataView.getInt16(4, true);
+
+  if (grabacionActiva) {
+    const tiempoRelativo = Math.round(performance.now() - tiempoInicioMs);
+    bufferMuestras.push({ t: tiempoRelativo, x, y, z });
+  }
+
+  if (streaming) {
+    document.getElementById('valX').textContent = x;
+    document.getElementById('valY').textContent = y;
+    document.getElementById('valZ').textContent = z;
+
+    puntosX.push(x); puntosX.shift();
+    puntosY.push(y); puntosY.shift();
+    puntosZ.push(z); puntosZ.shift();
+  }
+}
+
+recordBtn.addEventListener('click', () => {
+  if (grabacionActiva) return;
+
+  grabacionActiva = true;
+  bufferMuestras = [];
+  tiempoInicioMs = performance.now();
+
+  recordBtn.disabled = true;
+  recordBtn.classList.add('recording');
+  recordBtn.textContent = "Grabando...";
+
+  let segundosRestantes = 3;
+  recordStatus.textContent = `Grabando movimiento... (${segundosRestantes}s)`;
+
+  const intervalId = setInterval(() => {
+    segundosRestantes--;
+    if (segundosRestantes > 0) {
+      recordStatus.textContent = `Grabando movimiento... (${segundosRestantes}s)`;
+    } else {
+      clearInterval(intervalId);
+    }
+  }, 1000);
+
+  setTimeout(() => {
+    grabacionActiva = false;
+    recordBtn.disabled = false;
+    recordBtn.classList.remove('recording');
+    recordBtn.textContent = "⏺ Grabar Muestra (3s)";
+    recordStatus.textContent = `Captura terminada (${bufferMuestras.length} muestras). Descargando CSV...`;
+
+    exportarACSV(bufferMuestras);
+  }, DURACION_GRABACION_MS);
+});
+
+function exportarACSV(muestras) {
+  if (!muestras || muestras.length === 0) {
+    alert("No se capturaron datos durante el intervalo.");
+    return;
+  }
+
+  let contenidoCsv = "timestamp_ms,x_mg,y_mg,z_mg\r\n";
+  for (const fila of muestras) {
+    contenidoCsv += `${fila.t},${fila.x},${fila.y},${fila.z}\r\n`;
+  }
+
+  const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement("a");
+
+  const fechaIso = new Date().toISOString().replace(/[:.]/g, "-");
+  enlace.setAttribute("href", url);
+  enlace.setAttribute("download", `microbit_muestra_${fechaIso}.csv`);
+  document.body.appendChild(enlace);
+
+  enlace.click();
+  document.body.removeChild(enlace);
+  URL.revokeObjectURL(url);
+}
+
+streamBtn.addEventListener('click', () => {
+  streaming = !streaming;
+  if (streaming) {
+    streamBtn.textContent = "2. Pausar Gráfica";
+    streamBtn.classList.add('active');
+  } else {
+    streamBtn.textContent = "2. Reanudar Gráfica";
+    streamBtn.classList.remove('active');
+  }
+});
+
+// Renderizado continuo en Canvas
+const canvas = document.getElementById('grafica');
+const ctx = canvas.getContext('2d');
+
+function trazar(datos, color) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  const paso = canvas.width / (MAX_PUNTOS - 1);
+  const centroY = canvas.height / 2;
+  const escala = (canvas.height / 2) / 2048;
+
+  for (let i = 0; i < datos.length; i++) {
+    const px = i * paso;
+    const py = centroY - (datos[i] * escala);
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = '#27272a';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height / 2);
+  ctx.lineTo(canvas.width, canvas.height / 2);
+  ctx.stroke();
+
+  trazar(puntosX, '#f87171');
+  trazar(puntosY, '#4ade80');
+  trazar(puntosZ, '#60a5fa');
+
+  requestAnimationFrame(render);
+}
+
+requestAnimationFrame(render);
 </script>
 </body>
 </html>
