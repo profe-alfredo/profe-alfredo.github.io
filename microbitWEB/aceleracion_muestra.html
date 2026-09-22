@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>micro:bit — Flasheo USB y Captura de Movimiento</title>
-  <!-- Librería estándar de ARM DAPLink para WebUSB -->
-  <script src="https://cdn.jsdelivr.net/npm/dapjs@2.2.3/dist/dap.umd.js"></script>
+  <!-- Librería DAPjs oficial sin versión inexistente -->
+  <script src="https://cdn.jsdelivr.net/npm/dapjs/dist/dap.umd.js"></script>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -125,59 +125,72 @@ const flashStatus = document.getElementById('flashStatus');
 const flashProgressArea = document.getElementById('flashProgressArea');
 const flashProgressBar = document.getElementById('flashProgressBar');
 
+// Función auxiliar para cargar scripts UMD con respaldo entre CDNs
+function cargarScript(url) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error(`Fallo al cargar script: ${url}`));
+    document.head.appendChild(s);
+  });
+}
+
 flashBtn.addEventListener('click', async () => {
   try {
     flashBtn.disabled = true;
     flashProgressArea.style.display = "flex";
     flashProgressBar.value = 0;
-    flashStatus.textContent = "Selecciona tu micro:bit en la ventana...";
+    flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
 
-    // 1. Abrir diálogo USB de Chrome/Edge con el Vendor ID oficial de micro:bit (0x0d28)
+    // 1. Abrir diálogo nativo USB en el primer milisegundo del clic (gesto de usuario)
     const device = await navigator.usb.requestDevice({
       filters: [{ vendorId: 0x0d28 }]
     });
 
-    // 2. Obtener la librería DAPjs de forma infalible (minúscula, mayúscula o import dinámico)
-    let DAP = window.dapjs || window.DAPjs;
-    if (!DAP || !DAP.WebUSB) {
-      flashStatus.textContent = "Cargando motor USB...";
-      const modulo = await import("https://esm.sh/dapjs@2.2.3");
-      DAP = modulo.WebUSB ? modulo : (modulo.default || modulo);
+    // 2. Garantizar que DAPjs esté disponible en memoria
+    let DAP = window.DAPjs || window.dapjs;
+    if (!DAP) {
+      flashStatus.textContent = "Cargando motor DAPLink...";
+      try {
+        await cargarScript('https://cdn.jsdelivr.net/npm/dapjs/dist/dap.umd.js');
+      } catch {
+        // Respaldo secundario si jsDelivr tiene problemas
+        await cargarScript('https://unpkg.com/dapjs/dist/dap.umd.js');
+      }
+      DAP = window.DAPjs || window.dapjs;
     }
 
-    const WebUSB = DAP.WebUSB;
-    const DAPLink = DAP.DAPLink;
-
-    if (!WebUSB || !DAPLink) {
-      throw new Error("No se pudieron cargar los controladores WebUSB/DAPLink.");
+    if (!DAP || !DAP.WebUSB || !DAP.DAPLink) {
+      throw new Error("No se pudo inicializar la librería DAPjs.");
     }
 
-    // 3. Descargar el archivo firmware.hex
+    // 3. Descargar el firmware .hex ubicado junto al HTML
     flashStatus.textContent = "Cargando firmware.hex...";
     const response = await fetch('./firmware.hex');
     if (!response.ok) {
-      throw new Error("No se encontró './firmware.hex'. Asegúrate de que esté en la misma carpeta que este HTML.");
+      throw new Error("No se encontró './firmware.hex'. Asegúrate de que el archivo esté en la misma carpeta que este HTML.");
     }
     const hexData = await response.text();
 
-    // 4. Inicializar transporte y controlador DAPLink
-    const transport = new WebUSB(device);
-    const target = new DAPLink(transport);
+    // 4. Conectar y flashear
+    const transport = new DAP.WebUSB(device);
+    const target = new DAP.DAPLink(transport);
 
-    // Escuchar el progreso del flasheo ('progress')
+    // Escuchar el porcentaje de avance
     target.on('progress', (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
       flashStatus.textContent = `Flasheando firmware... ${porcentaje}%`;
     });
 
-    flashStatus.textContent = "Conectando al chip de interfaz...";
+    flashStatus.textContent = "Conectando al micro:bit por USB...";
     await target.connect();
 
-    flashStatus.textContent = "Escribiendo en la memoria Flash...";
+    flashStatus.textContent = "Escribiendo en memoria Flash...";
     const enc = new TextEncoder();
-    // Pasamos el búfer binario del archivo HEX
-    await target.flash(enc.encode(hexData).buffer);
+    // Enviamos el buffer codificado del archivo .hex
+    await target.flash(enc.encode(hexData));
 
     flashProgressBar.value = 100;
     flashStatus.textContent = "¡micro:bit programado con éxito!";
