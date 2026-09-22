@@ -119,31 +119,42 @@
 
 <!-- Script tipo módulo para permitir importación ES6 -->
 <script type="module">
-// Importamos directamente WebUSBConnection (o todo el espacio de nombres por seguridad)
-import * as microbitConnection from "https://esm.sh/@microbit/microbit-connection";
+// Importamos directamente el módulo específico de WebUSB
+import * as webusbModule from "https://esm.sh/@microbit/microbit-connection/webusb";
 
-// ==========================================
-// FUNCIÓN PARA CREAR LA CONEXIÓN WEBUSB
-// ==========================================
+// Función robusta para instanciar la conexión WebUSB
 function crearConexionWebUSB() {
-  const mb = microbitConnection.default || microbitConnection;
+  const mod = webusbModule.default || webusbModule;
 
-  // 1. Llamada a la función de fábrica oficial (SIN 'new')
-  if (typeof mb.createWebUSBConnection === 'function') {
-    return mb.createWebUSBConnection();
+  // 1. Fábrica oficial createWebUSBConnection
+  if (typeof mod.createWebUSBConnection === 'function') {
+    return mod.createWebUSBConnection();
   }
-  
-  // 2. Respaldo en caso de que exporte como clase
-  if (typeof mb.WebUSBConnection === 'function') {
+  if (typeof webusbModule.createWebUSBConnection === 'function') {
+    return webusbModule.createWebUSBConnection();
+  }
+
+  // 2. Clase constructora WebUSBConnection
+  const ConnectionClass = mod.WebUSBConnection || webusbModule.WebUSBConnection;
+  if (typeof ConnectionClass === 'function') {
     try {
-      return new mb.WebUSBConnection();
+      return new ConnectionClass();
     } catch {
-      return mb.WebUSBConnection();
+      return ConnectionClass();
     }
   }
 
-  console.error("Propiedades exportadas disponibles:", Object.keys(mb));
-  throw new Error("No se encontró el método de conexión WebUSB en la librería.");
+  // 3. Exportación por defecto
+  if (typeof mod === 'function') {
+    try {
+      return new mod();
+    } catch {
+      return mod();
+    }
+  }
+
+  console.error("Exportaciones de /webusb:", Object.keys(webusbModule));
+  throw new Error("No se pudo inicializar el cliente WebUSB desde el módulo.");
 }
 
 // ==========================================
@@ -161,7 +172,7 @@ flashBtn.addEventListener('click', async () => {
     flashProgressBar.value = 0;
     flashStatus.textContent = "Selecciona tu micro:bit en la ventana emergente...";
 
-    // Instanciamos llamando a la fábrica y abrimos el selector USB
+    // Abre el selector nativo de Chrome/Edge en el primer tick del clic
     const connection = crearConexionWebUSB();
     await connection.connect();
 
@@ -169,13 +180,13 @@ flashBtn.addEventListener('click', async () => {
     flashStatus.textContent = "Cargando firmware.hex...";
     const response = await fetch('./firmware.hex');
     if (!response.ok) {
-      throw new Error("No se encontró './firmware.hex'. Asegúrate de que esté en la misma carpeta que este HTML.");
+      throw new Error("No se encontró el archivo './firmware.hex'. Asegúrate de que esté en la misma carpeta que este HTML.");
     }
     const hexData = await response.text();
 
     flashStatus.textContent = "Flasheando micro:bit (0%)...";
 
-    // Escribimos la memoria Flash
+    // Escribir a la memoria Flash
     await connection.flash(hexData, (progress) => {
       const porcentaje = Math.round(progress * 100);
       flashProgressBar.value = porcentaje;
