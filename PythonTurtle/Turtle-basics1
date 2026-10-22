@@ -1,0 +1,18 @@
+from turtle import *
+
+color("#ffd000")
+forward(100)
+color("#00ff48")
+right(90)
+forward(100)
+color("red")
+right(90)
+forward(100)
+color("blue")
+right(90)
+forward(100)
+
+# if you are using a local environment such as
+# Visual Studio Code, add "done()" at the end
+# to prevent the output window from closing 
+done()
