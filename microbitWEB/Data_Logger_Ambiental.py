@@ -35,28 +35,30 @@ while True:
     # Registro cada 6000 ms (6 segundos)
     if capturar_datos and (running_time() - last_log_time >= 6000):
         last_log_time = running_time()
-        display.show(Image.HEART)
+        
+        # 1. LEER VARIABLES PRIMERO (Asegura que los LEDs estén libres)
+        temp = temperature()
+        luz = display.read_light_level()
+        sonido = microphone.sound_level()
+        cond = pin1.read_analog()
         
         try:
-            # log.add usa un diccionario con las etiquetas exactas definidas arriba
+            # 2. GUARDAR EN EL LOG
             log.add({
-                "Temperatura": temperature(),
-                "Luz": display.read_light_level(),
-                "Sonido": microphone.sound_level(),
-                "Conductividad": pin1.read_analog()
+                "Temperatura": temp,
+                "Luz": luz,
+                "Sonido": sonido,
+                "Conductividad": cond
             })
-            sleep(200) # Mostrar el corazón un momento para confirmar visualmente
+            
+            # 3. MOSTRAR CONFIRMACIÓN VISUAL DESPUÉS DE LA LECTURA
+            display.show(Image.HEART)
+            sleep(200)
             display.clear()
-        
-        # MicroPython lanza un OSError cuando la memoria de registro está llena
+            
         except OSError:
             capturar_datos = False
-            # Encender todos los LEDs usando un string de intensidad (9 = máximo)
-            display.show(Image("99999:"
-                               "99999:"
-                               "99999:"
-                               "99999:"
-                               "99999"))
-            
+            display.show(Image("99999:99999:99999:99999:99999"))
+                    
     # Pequeña pausa para no saturar el procesador
     sleep(50)
