@@ -1,0 +1,110 @@
+<style>
+    :root {
+      --ink: #172b4d;
+      --muted: #52627a;
+      --blue: #2457c5;
+      --blue-dark: #193f91;
+      --pale: #eef4ff;
+      --line: #d9e2f0;
+      --paper: #ffffff;
+      --bg: #f5f7fb;
+      --green: #176b4d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    header {
+      padding: 3.5rem 1.25rem 3rem;
+      color: white;
+      background: linear-gradient(135deg, #183d83, #2867d7);
+    }
+    .wrap { width: min(100% - 2rem, 960px); margin-inline: auto; }
+    .eyebrow {
+      margin: 0 0 .5rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .78rem;
+      font-weight: 750;
+      opacity: .85;
+    }
+    h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.35rem); line-height: 1.1; }
+    header p { max-width: 680px; margin: 1rem 0 0; font-size: 1.1rem; color: #edf3ff; }
+    main { padding-block: 2rem 3rem; }
+    section, .calculator {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: clamp(1.15rem, 3vw, 2rem);
+      margin-bottom: 1.25rem;
+      box-shadow: 0 5px 18px rgba(25, 49, 87, .045);
+    }
+    h2 { margin: 0 0 .75rem; font-size: 1.5rem; line-height: 1.25; }
+    h3 { margin-bottom: .4rem; }
+    p { margin-top: .5rem; }
+    .muted { color: var(--muted); }
+    .formula {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: var(--pale);
+      border: 1px solid #d7e4ff;
+      border-radius: 12px;
+      text-align: center;
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      font-weight: 750;
+      color: var(--blue-dark);
+      letter-spacing: .015em;
+    }
+    .formula small { display: block; font-size: .82rem; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .variables { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin-top: 1rem; }
+    .variable { background: #f8faff; border: 1px solid var(--line); padding: .9rem; border-radius: 12px; }
+    .variable strong { display: block; color: var(--blue-dark); font-size: 1.15rem; }
+    .variable span { font-size: .9rem; color: var(--muted); }
+    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    label { display: block; font-weight: 700; margin-bottom: .4rem; }
+    .field-note { display: block; color: var(--muted); font-size: .88rem; margin-top: .3rem; }
+    input, select {
+      display: block;
+      width: 100%;
+      min-height: 48px;
+      padding: .7rem .8rem;
+      border: 1px solid #aebdd2;
+      border-radius: 10px;
+      font: inherit;
+      color: var(--ink);
+      background: white;
+    }
+    input:focus, select:focus, button:focus-visible {
+      outline: 3px solid #a9c5ff;
+      outline-offset: 2px;
+      border-color: var(--blue);
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.2rem; }
+    button {
+      border: 0; border-radius: 10px; padding: .8rem 1.1rem;
+      font: inherit; font-weight: 750; cursor: pointer;
+    }
+    .primary { background: var(--blue); color: white; }
+    .primary:hover { background: var(--blue-dark); }
+    .secondary { background: #eaf0fa; color: var(--ink); }
+    .result {
+      margin-top: 1.25rem; padding: 1.1rem; border-radius: 12px;
+      border: 1px solid #b8decf; background: #f0faf5;
+    }
+    .result h3 { margin-top: 0; color: var(--green); }
+    .result-value { font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 800; color: var(--green); line-height: 1.2; }
+    .steps { margin-bottom: 0; padding-left: 1.25rem; }
+    .steps li { margin: .35rem 0; }
+    .error { color: #a11d2d; font-weight: 650; margin-top: .8rem; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    footer { text-align: center; padding: 1.5rem 1rem 2rem; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 620px) {
+      .variables { grid-template-columns: 1fr; }
+      .calc-grid { grid-template-columns: 1fr; }
+      header { padding-block: 2.5rem; }
+    }
+  </style>
