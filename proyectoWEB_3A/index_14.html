@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mundo Musical | Descubre tu ritmo</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #100c20;
+    color: white;
+}
+
+header {
+    background: linear-gradient(120deg, #6415a8, #d52b91);
+    padding: 25px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 10px;
+    font-weight: bold;
+}
+
+.hero {
+    text-align: center;
+    padding: 85px 20px;
+    background: linear-gradient(135deg, #21113f, #45135d, #21113f);
+}
+
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 18px;
+    color: #e5d9f5;
+    max-width: 650px;
+    margin: auto;
+    line-height: 1.6;
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 30px;
+    background: #ff3eaa;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: #a947ff;
+    transform: scale(1.05);
+}
+
+section {
+    padding: 60px 8%;
+}
+
+h2 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #ff77c8;
+}
+
+.intro {
+    text-align: center;
+    color: #d4c9e6;
+    margin: 0 auto 35px;
+    max-width: 700px;
+    line-height: 1.6;
+}
+
+.generos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+}
+
+.card {
+    background: #211936;
+    padding: 28px 22px;
+    border-radius: 18px;
+    text-align: center;
+    border: 1px solid #53316c;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    border-color: #ff4bb7;
+    box-shadow: 0 10px 25px #a32c8733;
+}
+
+.card .emoji {
+    font-size: 45px;
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    color: #ff8bd0;
+    margin-bottom: 12px;
+}
+
+.card p {
+    color: #d3c9df;
+    line-height: 1.5;
+}
+
+.test {
+    background: linear-gradient(135deg, #35145b, #681b70);
+    text-align: center;
+    border-radius: 25px;
+    max-width: 850px;
+    margin: auto;
+}
+
+.test p {
+    margin: 15px;
+    color: #eee2fa;
+}
+
+select {
+    padding: 13px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 350px;
+    margin-top: 15px;
+    font-size: 16px;
+}
+
+#resultado {
+    margin-top: 25px;
+    font-size: 20px;
+    color: #ffd1ef;
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    background: #090713;
+    padding: 25px;
+    color: #b8a8ca;
+}
+
+@media (max-width: 600px) {
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    header {
+        justify-content: center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🎧 MUNDO MUSICAL</div>
+    <nav>
+        <a href="#inicio">Inicio</a>
+        <a href="#generos">Géneros</a>
+        <a href="#test">Mi estilo</a>
+    </nav>
+</header>
+
+<div class="hero" id="inicio">
+    <h1>¡Descubre tu ritmo! 🎶</h1>
+    <p>
+        Explora el maravilloso mundo de la música.
+        Conoce diferentes géneros, descubre nuevos sonidos
+        y encuentra el estilo que representa tu personalidad.
+    </p>
+    <a href="#generos" class="btn">Explorar géneros</a>
+</div>
+
+<section id="generos">
+    <h2>Explora los géneros musicales</h2>
+    <p class="intro">
+        Cada género tiene su propia historia, ritmo y personalidad.
+        ¡Conoce algunos de los más populares!
+    </p>
+
+    <div class="generos">
+
+        <div class="card">
+            <div class="emoji">🎤</div>
+            <h3>Pop</h3>
+            <p>
+                Música popular con melodías pegadizas,
+                ritmos variados y canciones fáciles de recordar.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="emoji">🎸</div>
+            <h3>Rock</h3>
+            <p>
+                Se caracteriza por guitarras eléctricas,
+                baterías fuertes y mucha energía.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="emoji">🔥</div>
+            <h3>Reguetón</h3>
+            <p>
+                Género urbano con ritmos bailables,
+                influencias caribeñas y sonidos modernos.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="emoji">🎧</div>
+            <h3>Electrónica</h3>
+            <p>
+                Utiliza sonidos digitales, sintetizadores
+                y ritmos ideales para bailar.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="emoji">🎙️</div>
+            <h3>Rap</h3>
+            <p>
+                Combina ritmo, rimas y expresión.
+                Sus letras cuentan historias y transmiten ideas.
+            </p>
+        </div>
+
+        <div class="card">
+            <div class="emoji">🤠</div>
+            <h3>Regional mexicano</h3>
+            <p>
+                Reúne estilos como banda, norteño y mariachi,
+                representando tradiciones y cultura mexicana.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<section id="test">
+    <div class="test">
+        <h2>¿Qué género va contigo? 💜</h2>
+        <p>
+            Elige la actividad que más disfrutas
+            y descubre una recomendación musical.
+        </p>
+
+        <select id="gusto">
+            <option value="">Selecciona tu preferencia</option>
+            <option value="pop">Cantar y escuchar melodías</option>
+            <option value="rock">Sentir energía y emoción</option>
+            <option value="regueton">Bailar y divertirme</option>
+            <option value="electronica">Disfrutar sonidos modernos</option>
+            <option value="rap">Escuchar letras y rimas</option>
+            <option value="regional">Disfrutar mis raíces mexicanas</option>
+        </select>
+
+        <br>
+
+        <button class="btn" onclick="descubrir()">
+            Descubrir mi género
+        </button>
+
+        <div id="resultado"></div>
+    </div>
+</section>
+
+<footer>
+    <p>🎵 MUNDO MUSICAL © 2026</p>
+    <p>La música une personas, culturas y emociones.</p>
+</footer>
+
+<script>
+function descubrir() {
+    let gusto = document.getElementById("gusto").value;
+    let resultado = document.getElementById("resultado");
+
+    let generos = {
+        pop: "🎤 ¡Tu género ideal puede ser el POP! Te gustan las melodías pegadizas.",
+        rock: "🎸 ¡El ROCK es para ti! Disfrutas la energía y la emoción.",
+        regueton: "🔥 ¡Tu estilo es el REGUETÓN! Te encanta bailar y divertirte.",
+        electronica: "🎧 ¡La ELECTRÓNICA va contigo! Te gustan los sonidos modernos.",
+        rap: "🎙️ ¡El RAP es tu estilo! Disfrutas las rimas y las historias.",
+        regional: "🤠 ¡El REGIONAL MEXICANO es para ti! Te gustan las tradiciones musicales."
+    };
+
+    if (gusto === "") {
+        resultado.textContent = "Por favor, selecciona una opción primero.";
+    } else {
+        resultado.textContent = generos[gusto];
+    }
+}
+</script>
+
+</body>
+</html>
+
+

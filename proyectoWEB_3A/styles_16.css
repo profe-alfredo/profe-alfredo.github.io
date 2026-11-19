@@ -1,0 +1,223 @@
+
+/* CONFIGURACIÓN GENERAL */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #101827;
+    color: white;
+    line-height: 1.6;
+}
+
+/* ENCABEZADO */
+header {
+    background-color: #0b1220;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 7%;
+    flex-wrap: wrap;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+    color: white;
+}
+
+.logo span {
+    color: #ff9d00;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    color: #ff9d00;
+}
+
+/* PORTADA */
+.hero {
+    min-height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+
+    background:
+    linear-gradient(rgba(5, 12, 25, 0.75),
+    rgba(5, 12, 25, 0.85)),
+    url("https://images.unsplash.com/photo-1461896836934-ffe607ba8211");
+
+    background-size: cover;
+    background-position: center;
+}
+
+.hero-contenido {
+    max-width: 750px;
+}
+
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 19px;
+    margin-bottom: 30px;
+}
+
+/* BOTONES */
+.boton {
+    display: inline-block;
+    background-color: #ff9d00;
+    color: #101827;
+    padding: 13px 28px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.boton:hover {
+    background-color: #ffc04d;
+    transform: translateY(-3px);
+}
+
+/* SECCIONES */
+.seccion {
+    padding: 65px 8%;
+    text-align: center;
+}
+
+.seccion h2,
+.sueno h2,
+.objetivo h2 {
+    font-size: 32px;
+    color: #ff9d00;
+    margin-bottom: 20px;
+}
+
+.seccion > p {
+    max-width: 850px;
+    margin: auto;
+}
+
+/* SUEÑO GRANDE */
+.sueno {
+    padding: 65px 10%;
+    text-align: center;
+    background-color: #1c2b43;
+}
+
+.sueno p {
+    max-width: 800px;
+    margin: auto;
+    font-size: 21px;
+}
+
+/* TARJETAS */
+.contenedor {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin-top: 35px;
+}
+
+.tarjeta {
+    background-color: #1c2b43;
+    padding: 30px;
+    border-radius: 12px;
+    flex: 1;
+    min-width: 220px;
+    max-width: 350px;
+    border-bottom: 4px solid #ff9d00;
+    transition: 0.3s;
+}
+
+.tarjeta:hover {
+    transform: translateY(-8px);
+    background-color: #263a57;
+}
+
+.tarjeta h3 {
+    color: #ff9d00;
+    margin-bottom: 15px;
+}
+
+/* SECCIÓN MUSICAL */
+.musica {
+    background-color: #151f30;
+}
+
+/* OBJETIVO */
+.objetivo {
+    background: linear-gradient(135deg, #203b5c, #101827);
+    padding: 70px 10%;
+    text-align: center;
+}
+
+.objetivo p {
+    max-width: 750px;
+    margin: 0 auto 25px;
+}
+
+/* PIE DE PÁGINA */
+footer {
+    background-color: #080e18;
+    padding: 35px 15px;
+    text-align: center;
+    color: #b9c2ce;
+}
+
+footer h3 {
+    color: #ff9d00;
+    margin-bottom: 10px;
+}
+
+/* ADAPTACIÓN A CELULARES */
+@media (max-width: 768px) {
+
+    header {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    nav {
+        text-align: center;
+    }
+
+    nav a {
+        display: inline-block;
+        margin: 8px;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .contenedor {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tarjeta {
+        width: 100%;
+    }
+}

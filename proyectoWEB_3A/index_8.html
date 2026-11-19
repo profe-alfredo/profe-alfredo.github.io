@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lienzo | Mi mundo creativo</title>
+    <link rel="stylesheet" href="styles_8.css">
+</head>
+<body>
+
+<header class="encabezado">
+    <a href="#" class="logo">✦ Lienzo</a>
+
+    <nav>
+        <button class="nav-btn activo" data-seccion="inicio">Inicio</button>
+        <button class="nav-btn" data-seccion="perfil">Perfil</button>
+        <button class="nav-btn" data-seccion="notas">Ideas</button>
+        <button class="nav-btn" data-seccion="galeria">Galería</button>
+        <button class="nav-btn" data-seccion="estadisticas">Estadísticas</button>
+    </nav>
+
+    <button id="temaBtn" class="tema-btn">🌙</button>
+</header>
+
+<main class="contenedor">
+
+    <!-- INICIO -->
+    <section id="inicio" class="seccion activa">
+
+        <div class="hero">
+            <span class="etiqueta">TU ESPACIO CREATIVO ✨</span>
+            <h1>¡Hola, <span id="saludo">creativo/a</span>!</h1>
+            <p>Un lugar para descubrir, organizar y compartir
+            todo lo que te inspira.</p>
+
+            <button class="boton" onclick="mostrarSeccion('notas')">
+                Crear una idea →
+            </button>
+        </div>
+
+        <div class="frase">
+            <h2>💜 Una dosis de inspiración</h2>
+            <p id="fraseDia"></p>
+            <button id="nuevaFrase" class="boton secundario">
+                Otra frase ✨
+            </button>
+        </div>
+
+        <h2>Explora tus intereses</h2>
+
+        <div class="categorias">
+            <div class="categoria">
+                <span>🎵</span>
+                <h3>Música</h3>
+                <p>Descubre inspiración.</p>
+            </div>
+
+            <div class="categoria">
+                <span>🎨</span>
+                <h3>Arte</h3>
+                <p>Deja volar tu creatividad.</p>
+            </div>
+
+            <div class="categoria">
+                <span>📚</span>
+                <h3>Lectura</h3>
+                <p>Conoce nuevas historias.</p>
+            </div>
+
+            <div class="categoria">
+                <span>🎬</span>
+                <h3>Películas</h3>
+                <p>Inspírate con historias.</p>
+            </div>
+        </div>
+
+        <h2 class="subtitulo">Tu espacio en números</h2>
+
+        <div class="resumen">
+            <div class="resumen-card">
+                <span>📝</span>
+                <h3 id="totalNotas">0</h3>
+                <p>Ideas guardadas</p>
+            </div>
+
+            <div class="resumen-card">
+                <span>⭐</span>
+                <h3 id="totalFavoritos">0</h3>
+                <p>Favoritos</p>
+            </div>
+
+            <div class="resumen-card">
+                <span>📸</span>
+                <h3 id="totalFotos">0</h3>
+                <p>Fotografías</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- PERFIL -->
+    <section id="perfil" class="seccion">
+
+        <div class="titulo-seccion">
+            <h1>Mi perfil 👤</h1>
+            <p>Personaliza tu espacio en Lienzo.</p>
+        </div>
+
+        <div class="tarjeta">
+            <form id="formulario-bienvenida">
+
+                <label>Nombre</label>
+                <input type="text" id="nombre"
+                placeholder="Tu nombre" required>
+
+                <label>Correo electrónico</label>
+                <input type="email" id="email"
+                placeholder="Tu correo" required>
+
+                <label>Mis intereses</label>
+                <textarea id="intereses" rows="3"
+                placeholder="Música, hockey, series..."
+                required></textarea>
+
+                <label>Color de mi aplicación</label>
+                <select id="colorTema">
+                    <option value="#9333ea">Morado</option>
+                    <option value="#e75480">Rosa</option>
+                    <option value="#2563eb">Azul</option>
+                    <option value="#059669">Verde</option>
+                    <option value="#e58a20">Naranja</option>
+                </select>
+
+                <button class="boton" type="submit">
+                    Guardar mi perfil 💜
+                </button>
+            </form>
+        </div>
+    </section>
+
+
+    <!-- IDEAS -->
+    <section id="notas" class="seccion">
+
+        <div class="titulo-seccion">
+            <h1>Mi espacio de ideas 💭</h1>
+            <p>Escribe todo aquello que quieras recordar.</p>
+        </div>
+
+        <div class="tarjeta">
+            <form id="formulario-nota">
+
+                <label>Título de tu idea</label>
+                <input type="text" id="tituloNota"
+                placeholder="Mi próxima gran idea" required>
+
+                <label>Escribe tu pensamiento</label>
+                <textarea id="contenidoNota" rows="4"
+                placeholder="Escribe aquí..." required></textarea>
+
+                <button class="boton" type="submit">
+                    Guardar idea ✨
+                </button>
+            </form>
+        </div>
+
+        <h2 class="subtitulo">Mis ideas guardadas</h2>
+
+        <input type="search" id="buscarNota"
+        placeholder="🔍 Buscar una idea...">
+
+        <div class="filtros">
+            <button class="filtro activo" data-filtro="todas">Todas</button>
+            <button class="filtro" data-filtro="favoritas">⭐ Favoritas</button>
+        </div>
+
+        <div id="listaNotas" class="lista-notas"></div>
+    </section>
+
+
+    <!-- GALERÍA -->
+    <section id="galeria" class="seccion">
+
+        <div class="titulo-seccion">
+            <h1>Mi galería 📸</h1>
+            <p>Guarda tus momentos e imágenes favoritas.</p>
+        </div>
+
+        <div class="tarjeta">
+            <label for="subirFoto">Selecciona una fotografía</label>
+
+            <input type="file" id="subirFoto"
+            accept="image/*">
+
+            <p class="ayuda">Puedes agregar fotografías desde tu dispositivo.</p>
+        </div>
+
+        <div id="listaFotos" class="galeria"></div>
+    </section>
+
+
+    <!-- ESTADÍSTICAS -->
+    <section id="estadisticas" class="seccion">
+
+        <div class="titulo-seccion">
+            <h1>Mis estadísticas 📊</h1>
+            <p>Descubre todo lo que has creado.</p>
+        </div>
+
+        <div class="estadisticas-grid">
+
+            <div class="estadistica">
+                <span>📝</span>
+                <h2 id="statNotas">0</h2>
+                <p>Total de ideas</p>
+            </div>
+
+            <div class="estadistica">
+                <span>⭐</span>
+                <h2 id="statFavoritos">0</h2>
+                <p>Ideas favoritas</p>
+            </div>
+
+            <div class="estadistica">
+                <span>📸</span>
+                <h2 id="statFotos">0</h2>
+                <p>Fotos guardadas</p>
+            </div>
+
+            <div class="estadistica">
+                <span>📅</span>
+                <h2 id="statDias">0</h2>
+                <p>Días desde tu primera idea</p>
+            </div>
+
+        </div>
+
+        <div class="tarjeta">
+            <h2>💜 Mi perfil creativo</h2>
+            <p id="resumenPerfil">Todavía no has registrado tu perfil.</p>
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>✦ Lienzo © 2026 | Un espacio para ser tú.</p>
+    <p>Crea, imagina y descubre. 💜</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

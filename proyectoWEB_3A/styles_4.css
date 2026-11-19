@@ -1,0 +1,844 @@
+
+/* =====================================
+   MCE - MOUNTAIN AND CLIMBING EXPLORATION
+   DESIGN SYSTEM
+===================================== */
+
+/* PALETA DE COLORES */
+
+:root {
+    --forest: #193D32;
+    --deep: #10271F;
+    --lime: #D9F36A;
+    --cream: #F3EBDD;
+    --orange: #E47B50;
+    --blue: #A9C9DB;
+    --white: #FFFFFF;
+    --gray: #66736A;
+}
+
+/* CONFIGURACIÓN GENERAL */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--deep);
+}
+
+a {
+    text-decoration: none;
+}
+
+
+/* =====================================
+   NAVEGACIÓN
+===================================== */
+
+.navbar {
+    width: 100%;
+    min-height: 85px;
+    padding: 0 8%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: var(--cream);
+}
+
+.logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -3px;
+    color: var(--forest);
+}
+
+.logo span,
+.footer-brand span {
+    color: var(--orange);
+}
+
+.navbar nav {
+    display: flex;
+    gap: 30px;
+}
+
+.navbar nav a {
+    color: var(--forest);
+    font-size: 12px;
+    font-weight: 700;
+    transition: .3s;
+}
+
+.navbar nav a:hover {
+    color: var(--orange);
+}
+
+.nav-button {
+    background: var(--lime);
+    color: var(--deep);
+    padding: 14px 22px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 800;
+    transition: .3s;
+}
+
+.nav-button:hover {
+    background: var(--orange);
+    color: white;
+}
+
+
+/* =====================================
+   HERO / PORTADA
+===================================== */
+
+.hero {
+    min-height: 690px;
+    margin: 0 3%;
+    padding: 100px 9%;
+
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+
+    border-radius: 25px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(10, 32, 24, .93),
+            rgba(10, 32, 24, .15)
+        ),
+        url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b")
+        center / cover no-repeat;
+}
+
+.hero-content {
+    max-width: 720px;
+    animation: slideUp 1s ease;
+}
+
+.eyebrow {
+    display: inline-block;
+    background: var(--lime);
+    color: var(--deep);
+    padding: 11px 17px;
+    border-radius: 30px;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+
+    margin-bottom: 35px;
+}
+
+.hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: white;
+
+    font-size: clamp(60px, 9vw, 105px);
+    font-weight: 700;
+    letter-spacing: -6px;
+    line-height: .91;
+
+    margin-bottom: 35px;
+}
+
+.hero h1 span {
+    color: var(--lime);
+}
+
+.hero-content p {
+    color: white;
+    max-width: 480px;
+    font-size: 15px;
+    line-height: 1.9;
+    margin-bottom: 35px;
+}
+
+.primary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+
+    background: var(--lime);
+    color: var(--deep);
+
+    padding: 17px 27px;
+    border-radius: 40px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    transition: .3s;
+}
+
+.primary-button:hover {
+    background: white;
+    transform: translateY(-5px);
+}
+
+.primary-button span {
+    font-size: 18px;
+}
+
+.hero-info {
+    position: absolute;
+    bottom: 30px;
+    left: 9%;
+    right: 9%;
+
+    display: flex;
+    justify-content: space-between;
+
+    color: white;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+.hero-circle {
+    position: absolute;
+    right: 10%;
+    bottom: 100px;
+
+    width: 130px;
+    height: 130px;
+
+    border: 1px solid var(--lime);
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    color: var(--lime);
+
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.6;
+    letter-spacing: 1px;
+
+    transform: rotate(12deg);
+}
+
+
+/* =====================================
+   PROYECTO
+===================================== */
+
+.project {
+    padding: 120px 11%;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 45px;
+}
+
+.section-number {
+    color: #66804F;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 3px;
+}
+
+.small-tag {
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.project h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(42px, 6vw, 75px);
+    line-height: 1.05;
+    letter-spacing: -4px;
+}
+
+.project h2 span {
+    color: #829B55;
+}
+
+.project-description {
+    margin-top: 55px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 40px;
+}
+
+.description-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--orange);
+}
+
+.project-description p {
+    font-size: 16px;
+    line-height: 2;
+    color: var(--gray);
+}
+
+.project-highlight {
+    background: var(--lime);
+    padding: 30px 35px;
+    margin-top: 45px;
+    border-radius: 15px;
+
+    display: flex;
+    align-items: center;
+    gap: 35px;
+}
+
+.project-highlight span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 45px;
+    font-weight: 800;
+}
+
+.project-highlight p {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.8;
+}
+
+
+/* =====================================
+   PROBLEMA
+===================================== */
+
+.problem {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    min-height: 570px;
+
+    background: var(--forest);
+    color: white;
+}
+
+.problem-image {
+    background:
+        linear-gradient(
+            rgba(15, 40, 30, .1),
+            rgba(15, 40, 30, .45)
+        ),
+        url("https://images.unsplash.com/photo-1464278533981-50106e6176b1")
+        center / cover no-repeat;
+
+    min-height: 500px;
+    position: relative;
+}
+
+.image-caption {
+    position: absolute;
+    bottom: 30px;
+    left: 35px;
+
+    color: white;
+    font-size: 10px;
+    letter-spacing: 3px;
+    font-weight: 800;
+}
+
+.problem-content {
+    padding: 85px 10%;
+}
+
+.problem-content .section-number {
+    color: var(--lime);
+}
+
+.problem-content h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(40px, 5vw, 58px);
+    line-height: 1.05;
+    margin: 35px 0;
+    letter-spacing: -3px;
+}
+
+.problem-content h2 span {
+    color: var(--lime);
+}
+
+.problem-statement {
+    color: #D6E0D8;
+    font-size: 14px;
+    line-height: 2;
+}
+
+.problem-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 40px;
+}
+
+.problem-bottom span {
+    color: var(--lime);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+
+/* =====================================
+   E1 - MEMORIA
+===================================== */
+
+.memory {
+    padding: 100px 10%;
+    background: var(--blue);
+    color: var(--deep);
+}
+
+.memory-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.memory .section-number {
+    color: var(--forest);
+}
+
+.memory-badge {
+    background: var(--forest);
+    color: var(--lime);
+
+    padding: 12px 25px;
+    border-radius: 30px;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.memory-content {
+    max-width: 850px;
+    margin: 75px auto;
+}
+
+.memory-icon {
+    font-size: 45px;
+    color: var(--orange);
+    margin-bottom: 25px;
+}
+
+.memory h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(42px, 6vw, 78px);
+    line-height: 1;
+    letter-spacing: -4px;
+    margin-bottom: 35px;
+}
+
+.memory h2 span {
+    color: #497A68;
+}
+
+.memory-content p {
+    max-width: 600px;
+    font-size: 15px;
+    line-height: 2;
+    color: #34534B;
+}
+
+.memory-footer {
+    display: flex;
+    justify-content: space-between;
+
+    border-top: 1px solid rgba(16,39,31,.25);
+    padding-top: 25px;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+
+/* =====================================
+   MOONSHOT
+===================================== */
+
+.moonshot {
+    background: var(--cream);
+    padding: 110px 10%;
+
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 65px;
+    align-items: center;
+}
+
+.moonshot-image {
+    min-height: 550px;
+    border-radius: 20px;
+
+    background:
+        url("https://images.unsplash.com/photo-1454496522488-7a8e488e8606")
+        center / cover no-repeat;
+
+    box-shadow: 18px 18px 0 var(--orange);
+}
+
+.moonshot-content .section-number {
+    display: block;
+    margin-bottom: 25px;
+}
+
+.moonshot-label {
+    display: inline-block;
+    background: var(--orange);
+    color: white;
+
+    padding: 10px 18px;
+    border-radius: 30px;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+
+    margin-bottom: 25px;
+}
+
+.moonshot h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(43px, 5vw, 67px);
+    line-height: 1;
+    letter-spacing: -4px;
+    margin-bottom: 30px;
+}
+
+.moonshot h2 span {
+    color: #78924F;
+}
+
+.moonshot-content > p {
+    color: var(--gray);
+    font-size: 15px;
+    line-height: 2;
+    margin-bottom: 30px;
+}
+
+.moonshot-quote {
+    border-left: 5px solid var(--orange);
+    padding: 18px 22px;
+
+    background: white;
+
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+
+/* =====================================
+   PILARES
+===================================== */
+
+.pillars {
+    padding: 110px 9%;
+    background: var(--deep);
+    color: white;
+}
+
+.pillars .section-number {
+    color: var(--lime);
+}
+
+.pillars h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 55px;
+    letter-spacing: -3px;
+    line-height: 1.1;
+    margin: 30px 0 55px;
+}
+
+.pillar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 17px;
+}
+
+.pillar-card {
+    min-height: 270px;
+    padding: 27px;
+    border-radius: 17px;
+    transition: .3s;
+}
+
+.pillar-card:hover {
+    transform: translateY(-10px);
+}
+
+.pillar-card span {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 65px;
+}
+
+.pillar-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.pillar-card p {
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.card-green {
+    background: #315C49;
+    color: white;
+}
+
+.card-yellow {
+    background: var(--lime);
+    color: var(--deep);
+}
+
+.card-blue {
+    background: var(--blue);
+    color: var(--deep);
+}
+
+.card-orange {
+    background: var(--orange);
+    color: white;
+}
+
+
+/* =====================================
+   FOOTER
+===================================== */
+
+footer {
+    padding: 75px 10%;
+    background: #091B14;
+    text-align: center;
+    color: white;
+}
+
+.footer-brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 65px;
+    font-weight: 800;
+    letter-spacing: -5px;
+    color: var(--lime);
+}
+
+footer p {
+    font-size: 11px;
+    letter-spacing: 3px;
+    margin: 15px 0 30px;
+}
+
+.footer-line {
+    width: 100%;
+    height: 1px;
+    background: #385043;
+    margin: 30px 0;
+}
+
+.footer-motto {
+    display: block;
+    color: var(--lime);
+    font-size: 11px;
+    letter-spacing: 3px;
+    font-weight: 800;
+    margin-bottom: 30px;
+}
+
+footer small {
+    color: #819287;
+    font-size: 10px;
+}
+
+
+/* =====================================
+   ANIMACIONES
+===================================== */
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(35px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =====================================
+   DISEÑO RESPONSIVE
+===================================== */
+
+@media (max-width: 900px) {
+
+    .navbar {
+        padding: 20px 5%;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .navbar nav {
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .hero-circle {
+        display: none;
+    }
+
+    .pillar-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .moonshot {
+        gap: 40px;
+    }
+}
+
+@media (max-width: 650px) {
+
+    .navbar {
+        justify-content: center;
+    }
+
+    .navbar nav {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-button {
+        display: none;
+    }
+
+    .hero {
+        min-height: 600px;
+        margin: 0 10px;
+        padding: 70px 8%;
+    }
+
+    .hero h1 {
+        font-size: 57px;
+        letter-spacing: -3px;
+    }
+
+    .hero-info {
+        left: 8%;
+        right: 8%;
+        font-size: 8px;
+        gap: 15px;
+    }
+
+    .project {
+        padding: 80px 7%;
+    }
+
+    .project h2 {
+        font-size: 43px;
+        letter-spacing: -2px;
+    }
+
+    .project-description {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .project-highlight {
+        align-items: flex-start;
+        gap: 20px;
+        padding: 25px;
+    }
+
+    .problem {
+        grid-template-columns: 1fr;
+    }
+
+    .problem-image {
+        min-height: 350px;
+    }
+
+    .problem-content {
+        padding: 70px 8%;
+    }
+
+    .memory {
+        padding: 75px 7%;
+    }
+
+    .memory-content {
+        margin: 65px auto;
+    }
+
+    .memory h2 {
+        font-size: 46px;
+        letter-spacing: -2px;
+    }
+
+    .memory-footer {
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .moonshot {
+        grid-template-columns: 1fr;
+        padding: 80px 8%;
+    }
+
+    .moonshot-image {
+        min-height: 350px;
+    }
+
+    .moonshot h2 {
+        font-size: 48px;
+    }
+
+    .pillars {
+        padding: 80px 7%;
+    }
+
+    .pillars h2 {
+        font-size: 43px;
+    }
+
+    .pillar-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pillar-card {
+        min-height: 220px;
+    }
+
+    .pillar-card span {
+        margin-bottom: 40px;
+    }
+}
+

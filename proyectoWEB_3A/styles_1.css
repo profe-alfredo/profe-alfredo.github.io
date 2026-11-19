@@ -1,0 +1,254 @@
+
+/* CONFIGURACIÓN GENERAL */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2ed;
+    color: #222;
+    line-height: 1.6;
+}
+
+/* ENCABEZADO */
+
+header {
+    background-color: #17251e;
+    color: white;
+    padding: 20px 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.logo h1 {
+    font-size: 24px;
+    letter-spacing: 2px;
+}
+
+.logo span {
+    color: #e58b36;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    color: #e58b36;
+}
+
+/* PORTADA */
+
+.hero {
+    height: 550px;
+
+    background:
+    linear-gradient(rgba(0,0,0,0.55),
+    rgba(0,0,0,0.55)),
+    url("https://images.unsplash.com/photo-1522163182402-834f871fd851?auto=format&fit=crop&w=1600&q=80");
+
+    background-size: cover;
+    background-position: center;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+}
+
+.hero-contenido {
+    max-width: 700px;
+    padding: 20px;
+}
+
+.hero h2 {
+    font-size: 55px;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 19px;
+    margin-bottom: 30px;
+}
+
+/* BOTONES */
+
+.boton {
+    display: inline-block;
+    background-color: #e58b36;
+    color: white;
+    padding: 13px 30px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.boton:hover {
+    background-color: #b9671e;
+    transform: scale(1.05);
+}
+
+/* SECCIONES */
+
+.seccion {
+    padding: 70px 8%;
+    text-align: center;
+}
+
+.seccion h2 {
+    font-size: 32px;
+    color: #263b2e;
+    margin-bottom: 25px;
+    letter-spacing: 2px;
+}
+
+#nosotros p {
+    max-width: 850px;
+    margin: auto;
+    font-size: 18px;
+}
+
+/* MODALIDADES */
+
+.modalidades {
+    background-color: #e5e7df;
+}
+
+.contenedor-tarjetas {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin-top: 35px;
+}
+
+.tarjeta {
+    background-color: white;
+    width: 300px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    transition: 0.3s;
+}
+
+.tarjeta:hover {
+    transform: translateY(-10px);
+}
+
+.imagen img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.tarjeta h3 {
+    color: #d47a2c;
+    margin: 15px;
+}
+
+.tarjeta p {
+    padding: 0 20px 25px;
+}
+
+/* EQUIPO */
+
+.equipo {
+    background-color: #f2f2ed;
+}
+
+.lista-equipo {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 35px;
+}
+
+.elemento {
+    background-color: #263b2e;
+    color: white;
+    padding: 30px;
+    border-radius: 8px;
+}
+
+.elemento h3 {
+    color: #e58b36;
+    margin-bottom: 10px;
+}
+
+/* CONTACTO */
+
+.contacto {
+    background-color: #17251e;
+    color: white;
+}
+
+.contacto h2 {
+    color: #e58b36;
+}
+
+.contacto p {
+    margin-bottom: 25px;
+}
+
+/* PIE DE PÁGINA */
+
+footer {
+    background-color: #101a14;
+    color: white;
+    padding: 22px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* DISEÑO RESPONSIVO */
+
+@media (max-width: 768px) {
+
+    header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    nav {
+        text-align: center;
+    }
+
+    nav a {
+        display: inline-block;
+        margin: 5px;
+    }
+
+    .hero {
+        height: 450px;
+    }
+
+    .hero h2 {
+        font-size: 35px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .lista-equipo {
+        grid-template-columns: 1fr;
+    }
+
+    .seccion h2 {
+        font-size: 25px;
+    }
+}

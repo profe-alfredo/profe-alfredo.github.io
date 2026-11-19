@@ -1,0 +1,68 @@
+/* 1. Estilos generales de la página */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #e4e1ca;
+    color: #d8722eb2;
+}
+
+/* 2. Encabezado */
+header {
+    background-color: #b66100d2;
+    color: rgb(54, 34, 7);
+    text-align: center;
+    padding: 40px 20px;
+}
+
+/* Título principal */
+header h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
+    letter-spacing: 4px;
+}
+
+/* Subtítulo */
+header p {
+    font-size: 16px;
+    color: #000000;
+}
+
+/* 3. Contenido principal */
+main {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* 4. Secciones */
+section {
+    background-color: rgb(236, 234, 226);
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(78, 14, 14, 0.08);
+}
+
+/* 5. Títulos de las secciones */
+section h2 {
+    color: #b37400;
+    font-size: 24px;
+    border-bottom: 2px solid #3a2d10;
+    padding-bottom: 10px;
+}
+
+/* 6. Párrafos */
+section p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #362e15;
+}
+
+/* 7. Pie de página */
+footer {
+    background-color: #1d7224d2;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}

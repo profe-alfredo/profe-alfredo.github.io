@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lienzo | Encuentra tu comunidad</title>
+
+<link rel="stylesheet" href="styles_6.css">
+</head>
+
+<body>
+
+<header>
+  <div class="logo">lienzo<span>.</span></div>
+
+  <nav>
+    <a href="#inicio">Inicio</a>
+    <a href="#descubre">Descubre</a>
+    <a href="#comunidades">Comunidades</a>
+    <a href="#nosotros">Nosotros</a>
+  </nav>
+
+  <button class="header-btn" onclick="openModal('¡Bienvenido a Lienzo!')">
+    Explorar
+  </button>
+</header>
+
+<main>
+
+<section class="hero" id="inicio">
+  <div>
+    <div class="tag">✦ UN ESPACIO PARA SER TÚ</div>
+
+    <h1>Tu mundo tiene un lugar en <span>lienzo.</span></h1>
+
+    <p>
+      No tienes que encajar para pertenecer.
+      Descubre lo que te apasiona, encuentra personas
+      con tus mismos intereses y construye una comunidad
+      donde puedas ser auténticamente tú.
+    </p>
+
+    <button class="primary-btn"
+      onclick="document.getElementById('descubre').scrollIntoView({behavior:'smooth'})">
+      Descubre tu mundo
+    </button>
+  </div>
+
+  <div class="art">
+    <div class="floating float1">🎨 Creatividad</div>
+    <div class="art-center">🌈</div>
+    <div class="floating float2">💜 Pertenencia</div>
+    <div class="floating float3">⭐ Talentos</div>
+  </div>
+</section>
+
+<section id="descubre">
+  <div class="section-heading">
+    <h2>¿Qué te mueve?</h2>
+    <p>Todo comienza con algo que te gusta. Encuentra tu pasión.</p>
+  </div>
+
+  <div class="interests">
+
+    <div class="interest lavender" onclick="selectInterest(this,'Arte y dibujo')">
+      <div class="emoji">🎨</div>
+      <h3>Arte y dibujo</h3>
+      <p>Expresa lo que llevas dentro.</p>
+    </div>
+
+    <div class="interest pink" onclick="selectInterest(this,'Música')">
+      <div class="emoji">🎧</div>
+      <h3>Música</h3>
+      <p>Conecta a través de sonidos.</p>
+    </div>
+
+    <div class="interest green" onclick="selectInterest(this,'Naturaleza')">
+      <div class="emoji">🌱</div>
+      <h3>Naturaleza</h3>
+      <p>Explora y aprende del mundo.</p>
+    </div>
+
+    <div class="interest yellow" onclick="selectInterest(this,'Lectura')">
+      <div class="emoji">📚</div>
+      <h3>Lectura</h3>
+      <p>Historias que nos conectan.</p>
+    </div>
+
+    <div class="interest blue" onclick="selectInterest(this,'Tecnología')">
+      <div class="emoji">💻</div>
+      <h3>Tecnología</h3>
+      <p>Imagina lo que puedes crear.</p>
+    </div>
+
+    <div class="interest orange" onclick="selectInterest(this,'Deportes')">
+      <div class="emoji">⚽</div>
+      <h3>Deportes</h3>
+      <p>Comparte energía y movimiento.</p>
+    </div>
+
+  </div>
+</section>
+
+<section class="community" id="comunidades">
+  <div class="section-heading">
+    <h2>Encuentra tu familia</h2>
+    <p>Hay personas que comparten eso que tanto te gusta.</p>
+  </div>
+
+  <div class="community-grid">
+
+    <div class="community-card">
+      <div class="emoji">🖌️</div>
+      <h3>Artistas natos</h3>
+      <p>Un espacio para experimentar con arte, ilustración y nuevas ideas.</p>
+      <button onclick="joinCommunity('Club Creativo')">Conocer espacio</button>
+    </div>
+
+    <div class="community-card">
+      <div class="emoji">🎵</div>
+      <h3>Vibra Musical</h3>
+      <p>Comparte tus gustos musicales y descubre nuevos sonidos.</p>
+      <button onclick="joinCommunity('Vibra Musical')">Conocer espacio</button>
+    </div>
+
+    <div class="community-card">
+      <div class="emoji">📖</div>
+      <h3>Entre Páginas</h3>
+      <p>Para quienes encuentran mundos enteros en los libros.</p>
+      <button onclick="joinCommunity('Entre Páginas')">Conocer espacio</button>
+    </div>
+
+    <div class="community-card">
+      <div class="emoji">🍳</div>
+      <h3>A Fuego Lento</h3>
+      <p>Aprender, experimentar y crear deliciosas recetas desarrollando habilidades culinarias.</p>
+      <button onclick="joinCommunity('Ideas del Futuro')">Conocer espacio</button>
+    </div>
+
+  </div>
+</section>
+
+<section class="manifesto" id="nosotros">
+  <h2>Todos somos una obra en construcción.</h2>
+  <p>
+    En Lienzo creemos que cada persona tiene algo único que aportar.
+    No se trata de ser perfecto, popular o diferente a los demás.
+    Se trata de encontrar un lugar donde puedas descubrirte,
+    expresarte y sentir que formas parte de algo.
+    Porque nadie debería sentirse solo cuando todavía hay tanto
+    por descubrir.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <div class="logo">lienzo<span>.</span></div>
+
+  <p>Un espacio para descubrirte y conectar</p>
+  <p style="margin-top:12px">© 2026 Lienzo. Construyendo comunidad.</p>
+</footer>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2 id="modal-title">¡Hola!</h2>
+    <p id="modal-text"></p>
+    <button class="primary-btn" onclick="closeModal()">¡Genial!</button>
+    <button class="close-btn" onclick="closeModal()">Cerrar</button>
+  </div>
+</div>
+
+<script>
+function openModal(title, text = 'Este espacio está pensado para descubrir, compartir y conectar de manera respetuosa.') {
+  document.getElementById('modal-title').innerText = title;
+  document.getElementById('modal-text').innerText = text;
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+
+function selectInterest(element, interest) {
+  document.querySelectorAll('.interest').forEach(item => {
+    item.classList.remove('selected');
+  });
+
+  element.classList.add('selected');
+
+  openModal('¡Te gusta ' + interest + '! ',
+    '¡Qué bonito! Este es uno de los muchos intereses que puedes explorar en Lienzo.');
+}
+
+function joinCommunity(name) {
+  openModal('¡Descubramos ' + name + '!',
+    'Has encontrado un espacio que podría inspirarte. Próximamente podrás participar en actividades y conectar con la comunidad.');
+}
+</script>
+
+</body>
+</html>

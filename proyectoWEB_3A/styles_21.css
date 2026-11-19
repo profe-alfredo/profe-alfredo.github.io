@@ -1,0 +1,275 @@
+/* CONFIGURACIÓN GENERAL */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: #f4f7f4;
+    color: #26352b;
+    line-height: 1.6;
+}
+
+/* ENCABEZADO */
+
+.hero {
+    min-height: 480px;
+    background: linear-gradient(
+        rgba(10, 45, 25, 0.82),
+        rgba(10, 45, 25, 0.82)
+    ),
+    url("https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600")
+    center/cover no-repeat;
+
+    color: white;
+    padding: 25px 8%;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-link:hover {
+    color: #9be5a9;
+}
+
+.hero-content {
+    max-width: 650px;
+    margin-top: 100px;
+}
+
+.hero-content h1 {
+    font-size: 48px;
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #39a852;
+    color: white;
+    padding: 13px 25px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background-color: #267b3a;
+    transform: translateY(-3px);
+}
+
+/* SECCIONES */
+
+.section {
+    padding: 80px 10%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 50px;
+}
+
+.section-content {
+    max-width: 550px;
+}
+
+.tag {
+    color: #29964a;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.section h2,
+.solution h2,
+.community h2 {
+    font-size: 32px;
+    margin: 12px 0 20px;
+    color: #174b2b;
+}
+
+.section p {
+    margin-bottom: 15px;
+    color: #58645b;
+}
+
+/* TARJETA DE INFORMACIÓN */
+
+.info-card {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    min-width: 280px;
+}
+
+.info-card h3 {
+    margin-bottom: 20px;
+    color: #174b2b;
+}
+
+.info-card ul {
+    list-style: none;
+}
+
+.info-card li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eeeeee;
+}
+
+/* PROPUESTA DE SOLUCIÓN */
+
+.solution {
+    background-color: #e8f2e9;
+    padding: 80px 10%;
+    text-align: center;
+}
+
+.description {
+    max-width: 700px;
+    margin: 0 auto 40px;
+    color: #58645b;
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: white;
+    padding: 30px;
+    width: 280px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.card-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    color: #24763b;
+    margin-bottom: 12px;
+}
+
+.card p {
+    color: #68736b;
+}
+
+/* COMUNIDAD */
+
+.community {
+    padding: 80px 12%;
+    background-color: white;
+    text-align: center;
+}
+
+.community p {
+    max-width: 750px;
+    margin: 15px auto;
+    color: #58645b;
+}
+
+/* PIE DE PÁGINA */
+
+footer {
+    background-color: #153d25;
+    color: white;
+    text-align: center;
+    padding: 35px 15px;
+}
+
+footer h2 {
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+}
+
+footer p {
+    margin: 5px 0;
+    color: #d0dfd3;
+}
+
+footer small {
+    display: block;
+    margin-top: 20px;
+    color: #a8c4ae;
+}
+
+/* DISEÑO PARA CELULARES */
+
+@media (max-width: 768px) {
+
+    .hero {
+        padding: 20px 6%;
+    }
+
+    .hero-content {
+        margin-top: 80px;
+    }
+
+    .hero-content h1 {
+        font-size: 34px;
+    }
+
+    .section {
+        flex-direction: column;
+        padding: 55px 7%;
+    }
+
+    .info-card {
+        width: 100%;
+    }
+
+    .solution {
+        padding: 55px 7%;
+    }
+
+    .community {
+        padding: 55px 7%;
+    }
+
+    .navbar {
+        gap: 15px;
+    }
+
+    .nav-link {
+        font-size: 13px;
+    }
+}

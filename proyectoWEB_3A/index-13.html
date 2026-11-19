@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+      <h1 class="title">Hello World!</h1>
+      <p id="currentTime"></p>
+      <script src="script.js"></script>
+  </body>
+</html>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GNIUS | Laboratorio Virtual de Física</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>🔬 GNIUS</h1>
+        <h2>Mi laboratorio virtual de Física</h2>
+        <p>Aprende Física de una manera fácil, visual e interactiva.</p>
+    </header>
+
+    <nav>
+        <a href="#inicio">Inicio</a>
+        <a href="#mru">¿Qué es el MRU?</a>
+        <a href="#formula">Fórmula</a>
+        <a href="#calculadora">Calculadora</a>
+    </nav>
+
+    <main id="inicio">
+
+        <section class="bienvenida">
+            <h2>¡Bienvenido a GNIUS!</h2>
+            <p>
+                Explora el mundo de la Física y descubre cómo funcionan
+                los movimientos que observamos todos los días.
+            </p>
+        </section>
+
+        <section id="mru" class="tarjeta">
+            <h2>¿Qué es el movimiento rectilíneo uniforme?</h2>
+            <p>
+                El movimiento rectilíneo uniforme (MRU) ocurre cuando
+                un objeto se desplaza en línea recta con velocidad
+                constante. Esto significa que recorre distancias iguales
+                en tiempos iguales.
+            </p>
+            <div class="ejemplo">
+                <span>🚶</span>
+                <p>
+                    Ejemplo: una persona que camina en línea recta
+                    manteniendo siempre la misma velocidad.
+                </p>
+            </div>
+        </section>
+
+        <section id="formula" class="tarjeta">
+            <h2>Distancia, velocidad y tiempo</h2>
+            <p>
+                Para calcular la distancia recorrida por un objeto
+                utilizamos la siguiente fórmula:
+            </p>
+
+            <div class="formula">
+                d = v × t
+            </div>
+
+            <ul>
+                <li><strong>d:</strong> Distancia (metros).</li>
+                <li><strong>v:</strong> Velocidad (metros por segundo).</li>
+                <li><strong>t:</strong> Tiempo (segundos).</li>
+            </ul>
+
+            <p>
+                Un ejemplo cotidiano son las escaleras eléctricas
+                de un centro comercial, que se desplazan a una
+                velocidad aproximadamente constante.
+            </p>
+        </section>
+
+        <section id="calculadora" class="tarjeta calculadora">
+            <h2>🧮 Calculadora de MRU</h2>
+            <p>Introduce los datos para calcular la distancia recorrida.</p>
+
+            <label for="velocidad">Velocidad (m/s):</label>
+            <input type="number" id="velocidad" min="0" step="any"
+                   placeholder="Ejemplo: 5">
+
+            <label for="tiempo">Tiempo (segundos):</label>
+            <input type="number" id="tiempo" min="0" step="any"
+                   placeholder="Ejemplo: 10">
+
+            <button onclick="calcularDistancia()">Calcular distancia</button>
+
+            <div id="resultado" aria-live="polite">
+                El resultado aparecerá aquí.
+            </div>
+        </section>
+
+        <section class="tarjeta">
+            <h2>💡 ¿Sabías que...?</h2>
+            <p>
+                El MRU nos ayuda a comprender situaciones cotidianas
+                como el desplazamiento de vehículos, trenes y otros
+                objetos que mantienen una velocidad constante.
+            </p>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>GNIUS | Proyecto educativo de Física y tecnología.</p>
+        <p>Aprender, experimentar y descubrir.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>

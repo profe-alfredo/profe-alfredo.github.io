@@ -1,0 +1,291 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #F7F7FF;
+    color: #202D50;
+}
+
+/* ENCABEZADO */
+
+header {
+    background: #101D3A;
+    color: white;
+    padding: 22px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+header h1 {
+    color: #FCD34D;
+    font-size: 25px;
+    font-weight: 800;
+}
+
+nav {
+    display: flex;
+    gap: 22px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: .3s;
+}
+
+nav a:hover {
+    color: #FCD34D;
+}
+
+/* PORTADA */
+
+.hero {
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    padding: 80px 10%;
+
+    background:
+    linear-gradient(90deg,
+    rgba(16,29,58,.97),
+    rgba(16,29,58,.65)),
+    url("https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=1600")
+    center/cover;
+}
+
+.hero-content {
+    max-width: 650px;
+}
+
+.tag, .subtitle {
+    color: #E9A7FF;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.hero h2 {
+    color: white;
+    font-size: clamp(42px, 7vw, 75px);
+    line-height: 1.15;
+    margin: 25px 0;
+    font-weight: 800;
+}
+
+.hero h2 span {
+    color: #FCD34D;
+}
+
+.hero p {
+    color: #E1E8F5;
+    line-height: 1.9;
+    max-width: 530px;
+    margin-bottom: 30px;
+}
+
+/* BOTONES */
+
+.btn {
+    display: inline-block;
+    background: #FCD34D;
+    color: #172554;
+    padding: 15px 25px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 800;
+    font-size: 12px;
+    transition: .3s;
+}
+
+.btn:hover {
+    background: #E9A7FF;
+    transform: translateY(-5px);
+}
+
+/* PROYECTO */
+
+.project {
+    text-align: center;
+    padding: 90px 15%;
+    background: white;
+}
+
+.project h2 {
+    color: #293D78;
+    font-size: 35px;
+    margin: 20px 0;
+}
+
+.project p {
+    line-height: 2;
+    color: #65708B;
+}
+
+/* OPORTUNIDADES */
+
+.opportunities {
+    background: #F0F2FF;
+    text-align: center;
+    padding: 85px 8%;
+}
+
+.opportunities h2 {
+    font-size: 35px;
+    margin: 20px 0 40px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    max-width: 950px;
+    margin: auto;
+}
+
+.card {
+    padding: 40px 30px;
+    border-radius: 25px;
+    text-align: left;
+    transition: .3s;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+}
+
+.sports {
+    background: #DCEBFF;
+    border-bottom: 7px solid #5596E6;
+}
+
+.music {
+    background: #F0E3FF;
+    border-bottom: 7px solid #B77BE8;
+}
+
+.icon {
+    font-size: 55px;
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    font-size: 23px;
+    margin-bottom: 15px;
+}
+
+.card p {
+    line-height: 1.8;
+    color: #5E6882;
+    margin-bottom: 20px;
+}
+
+.card a {
+    text-decoration: none;
+    color: #293D78;
+    font-weight: 800;
+}
+
+/* SUEÑO GRANDE */
+
+.dream {
+    text-align: center;
+    padding: 90px 15%;
+    background: linear-gradient(120deg, #293D78, #743FB0);
+    color: white;
+}
+
+.dream span {
+    color: #FCD34D;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.dream h2 {
+    font-size: 38px;
+    margin: 25px 0;
+}
+
+.dream p {
+    line-height: 1.9;
+    color: #E1E8F5;
+}
+
+/* CONTACTO */
+
+.contact {
+    text-align: center;
+    padding: 80px 20px;
+    background: #FCD34D;
+}
+
+.contact h2 {
+    font-size: 32px;
+    color: #172554;
+    margin-bottom: 15px;
+}
+
+.contact p {
+    margin-bottom: 25px;
+}
+
+/* PIE DE PÁGINA */
+
+footer {
+    background: #101D3A;
+    color: white;
+    text-align: center;
+    padding: 35px 20px;
+    line-height: 2;
+}
+
+footer h2 {
+    color: #FCD34D;
+}
+
+/* DISEÑO RESPONSIVO */
+
+@media (max-width: 750px) {
+
+    header {
+        justify-content: center;
+        gap: 20px;
+    }
+
+    nav {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .hero {
+        min-height: 530px;
+        padding: 60px 7%;
+    }
+
+    .project {
+        padding: 65px 8%;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .dream {
+        padding: 70px 8%;
+    }
+
+    .dream h2 {
+        font-size: 29px;
+    }
+}
