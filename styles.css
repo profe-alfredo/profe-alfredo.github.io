@@ -264,3 +264,9 @@ footer {
   font-size: 0.9rem;
 }
 
+.enlace-pendiente {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-style: italic;
+}
+

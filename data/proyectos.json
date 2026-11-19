@@ -7,17 +7,39 @@
     "etiquetaCategoria": "micro:bit / Física",
     "descripcion": "Evidencia y datos iniciales publicados desde la unidad compartida.",
     "url_local": "",
-    "url_drive": "https://drive.google.com/drive/folders/ENLACE_REAL_DEL_PROYECTO"
+    "url_drive": ""
   },
-  
+
   {
     "id": "proyecto-01",
     "titulo": "Página WEB Proyecto",
-    "estudiantes": "Equipo 1 - Preparatoria",
+    "estudiantes": "Estudiante 1 - Preparatoria",
     "categoria": "HTML WEB",
     "etiquetaCategoria": "HTML WEB / Proyecto",
     "descripcion": "Primer diseño de página web para proyecto comunitario",
     "url_local": "",
     "url_drive": "https://drive.google.com/file/d/1eciq8Qz60ebEjU23xQ1qBZT4zXOUYSPy/view?usp=drive_link"
+  },
+
+  {
+    "id": "proyecto-02",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 2 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "",
+    "url_drive": "https://drive.google.com/file/d/1cRG5NyO_UegS47qsNW5M0khAwLMA-9Iz/view?usp=drive_link"
+  },
+
+  {
+    "id": "proyecto-04",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 4 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "",
+    "url_drive": "https://drive.google.com/file/d/1sHvK7feoPyJRDgz6_Qb1X5s1FmxNdB4K/view?usp=drive_link"
   }
 ]
