@@ -1,22 +1,23 @@
 [
   {
-    "id": "mua-tracker-01",
-    "titulo": "Análisis de MUA con Tracker y micro:bit",
-    "estudiantes": "Equipo 1 - 3er semestre",
+    "id": "proyecto-01",
+    "titulo": "Simulación y registro de movimiento",
+    "estudiantes": "Equipo 1 - Preparatoria",
     "categoria": "microbit",
     "etiquetaCategoria": "micro:bit / Física",
-    "descripcion": "Registro de movimiento y aceleración con sensor y validación en video.",
-    "url_local": "proyectos/mua-tracker-01/index.html",
-    "url_drive": "https://drive.google.com/drive/folders/TU_ID_DE_CARPETA_1"
-  },
-  {
-    "id": "web-cultura-digital-02",
-    "titulo": "Portal de Cultura Digital y Seguridad en Red",
-    "estudiantes": "Sofía M. y Luis R.",
-    "categoria": "web",
-    "etiquetaCategoria": "Diseño Web",
-    "descripcion": "Sitio estático en HTML y CSS publicado de forma ágil desde Drive.",
+    "descripcion": "Evidencia y datos iniciales publicados desde la unidad compartida.",
     "url_local": "",
-    "url_drive": "https://drive.google.com/drive/folders/TU_ID_DE_CARPETA_2"
+    "url_drive": "https://drive.google.com/drive/folders/ENLACE_REAL_DEL_PROYECTO"
+  }
+
+  {
+    "id": "proyecto-01",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Equipo 1 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "",
+    "url_drive": "https://drive.google.com/file/d/1eciq8Qz60ebEjU23xQ1qBZT4zXOUYSPy/view?usp=drive_link"
   }
 ]

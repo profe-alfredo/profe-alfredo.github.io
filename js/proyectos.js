@@ -8,14 +8,27 @@ function obtenerEnlacePrincipal(proyecto) {
       href: proyecto.url_local.trim(),
       texto: "Ver proyecto (Respaldo local)",
       origen: "Subcarpeta GitHub",
-      external: false
+      external: false,
+      disponible: true
     };
   }
+
+  if (proyecto.url_drive && proyecto.url_drive.trim() !== "") {
+    return {
+      href: proyecto.url_drive.trim(),
+      texto: "Abrir en Drive",
+      origen: "Google Drive",
+      external: true,
+      disponible: true
+    };
+  }
+
   return {
-    href: (proyecto.url_drive || "#").trim(),
-    texto: "Abrir en Drive",
-    origen: "Google Drive",
-    external: true
+    href: "",
+    texto: "Enlace pendiente",
+    origen: "Por publicar",
+    external: false,
+    disponible: false
   };
 }
 
@@ -37,9 +50,15 @@ function renderizarProyectos(filtro = "todos") {
         ? 'target="_blank" rel="noopener noreferrer"'
         : "";
 
+      const enlacePrincipal = principal.disponible
+        ? `<a href="${principal.href}" ${targetAttrs}>${principal.texto} →</a>`
+        : `<span class="enlace-pendiente">${principal.texto}</span>`;
+
       const enlaceSecundario =
-        principal.origen === "Subcarpeta GitHub" && proyecto.url_drive
-          ? `<a href="${proyecto.url_drive}" target="_blank" rel="noopener noreferrer">Carpeta Drive</a>`
+        principal.origen === "Subcarpeta GitHub" &&
+        proyecto.url_drive &&
+        proyecto.url_drive.trim() !== ""
+          ? `<a href="${proyecto.url_drive.trim()}" target="_blank" rel="noopener noreferrer">Carpeta Drive</a>`
           : "";
 
       return `
@@ -51,7 +70,7 @@ function renderizarProyectos(filtro = "todos") {
             <p>${proyecto.descripcion || ""}</p>
           </div>
           <div class="acciones-proyecto">
-            <a href="${principal.href}" ${targetAttrs}>${principal.texto} →</a>
+            ${enlacePrincipal}
             ${enlaceSecundario}
           </div>
         </article>
