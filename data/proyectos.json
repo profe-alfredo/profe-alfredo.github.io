@@ -35,11 +35,110 @@
   {
     "id": "proyecto-04",
     "titulo": "Página WEB Proyecto",
-    "estudiantes": "Estudiante 4 - Preparatoria",
+    "estudiantes": "Estudiante 3 - Preparatoria",
     "categoria": "HTML WEB",
     "etiquetaCategoria": "HTML WEB / Proyecto",
     "descripcion": "Primer diseño de página web para proyecto comunitario",
     "url_local": "/proyectoWEB_3A/index_4.html",
     "url_drive": "https://drive.google.com/file/d/1sHvK7feoPyJRDgz6_Qb1X5s1FmxNdB4K/view?usp=drive_link"
+  },
+
+  {
+    "id": "proyecto-06",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 4 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_6.html",
+    "url_drive": "https://drive.google.com/file/d/1vUp5dWjPL-ImWSQOFAK1jBixhGsUgx2y/view?usp=drive_link"
+  },
+
+  {
+    "id": "proyecto-07",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 5 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_7.html",
+    "url_drive": "https://drive.google.com/file/d/1XO2KC81ybh1j9qNoGFLQVewgnOo8v2tv/view?usp=drive_link"
+  },
+
+  {
+    "id": "proyecto-08",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 6 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_8.html",
+    "url_drive": "https://drive.google.com/file/d/16N1yAxJlH4TA2dioz2l5ZaFs_wueKoCz/view?usp=drive_link"
+  },
+
+   {
+    "id": "proyecto-14",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 7 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_14.html",
+    "url_drive": ""
+  },
+
+   {
+    "id": "proyecto-15",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 8 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_15.html",
+    "url_drive": ""
+  },
+
+   {
+    "id": "proyecto-16",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 9 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_16.html",
+    "url_drive": ""
+  },
+
+   {
+    "id": "proyecto-17",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 10 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_17.html",
+    "url_drive": ""
+  },
+
+   {
+    "id": "proyecto-18",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 11 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_18.html",
+    "url_drive": ""
+  },
+
+   {
+    "id": "proyecto-19",
+    "titulo": "Página WEB Proyecto",
+    "estudiantes": "Estudiante 12 - Preparatoria",
+    "categoria": "HTML WEB",
+    "etiquetaCategoria": "HTML WEB / Proyecto",
+    "descripcion": "Primer diseño de página web para proyecto comunitario",
+    "url_local": "/proyectoWEB_3A/index_19.html",
+    "url_drive": ""
   }
 ]
