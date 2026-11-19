@@ -1,0 +1,22 @@
+[
+  {
+    "id": "mua-tracker-01",
+    "titulo": "Análisis de MUA con Tracker y micro:bit",
+    "estudiantes": "Equipo 1 - 3er semestre",
+    "categoria": "microbit",
+    "etiquetaCategoria": "micro:bit / Física",
+    "descripcion": "Registro de movimiento y aceleración con sensor y validación en video.",
+    "url_local": "proyectos/mua-tracker-01/index.html",
+    "url_drive": "https://drive.google.com/drive/folders/TU_ID_DE_CARPETA_1"
+  },
+  {
+    "id": "web-cultura-digital-02",
+    "titulo": "Portal de Cultura Digital y Seguridad en Red",
+    "estudiantes": "Sofía M. y Luis R.",
+    "categoria": "web",
+    "etiquetaCategoria": "Diseño Web",
+    "descripcion": "Sitio estático en HTML y CSS publicado de forma ágil desde Drive.",
+    "url_local": "",
+    "url_drive": "https://drive.google.com/drive/folders/TU_ID_DE_CARPETA_2"
+  }
+]
